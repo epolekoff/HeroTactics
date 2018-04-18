@@ -8,6 +8,8 @@ public static class MapFactory {
     private const string MapTextAssetPath = "Maps/";
 
     private const string MapTileObjectReference = "Map/MapTile";
+    private const string MapTileDirtReference = "Map/MapTileDirt";
+    private const string MapTileGrassReference = "Map/MapTileGrass";
     private const float MapTileHeight = 0.5f;
     private const float MapTileWidth = 1f;
 
@@ -68,13 +70,25 @@ public static class MapFactory {
     private static void GenerateMapTile(Vector2 tile, int height, GameObject mapParent)
     {
         var mapTileResource = Resources.Load(MapTileObjectReference);
-        for(int i = 0; i < height; i++)
+        var dirt = Resources.Load(MapTileDirtReference) as Material;
+        var grass = Resources.Load(MapTileGrassReference) as Material;
+        for (int i = 0; i < height; i++)
         {
             var mapTileObject = GameObject.Instantiate(
-            mapTileResource,
-            new Vector3(tile.x * MapTileWidth, i * MapTileHeight, tile.y * MapTileWidth),
-            Quaternion.identity,
-            mapParent.transform) as GameObject;
+                mapTileResource,
+                new Vector3(tile.x * MapTileWidth, i * MapTileHeight, tile.y * MapTileWidth),
+                Quaternion.identity,
+                mapParent.transform) as GameObject;
+
+            // Set the tile as dirt or grass.
+            if(i == height - 1)
+            {
+                mapTileObject.GetComponentInChildren<Renderer>().material = grass;
+            }
+            else
+            {
+                mapTileObject.GetComponentInChildren<Renderer>().material = dirt;
+            }
         }
     }
 }
