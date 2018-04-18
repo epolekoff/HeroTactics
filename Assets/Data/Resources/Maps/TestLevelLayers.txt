@@ -1,0 +1,59 @@
+# Maps are made up of layers.
+# x means full block.
+# - means half-block.
+# o means no block.
+#
+ o o o o o o o o o o
+ o o o o o o o o o o
+ o o o o o o o o o o
+ - - o o o o o o o o
+ x - o o o o o o o o
+ - - o o o o o o o o
+ o o o o o o o o o o
+ o o o o o o o o o o
+ o o o o o o o o o o
+ o o o o o o o o o o
+ 
+ o o o o o o o o o o
+ o o o o o o o o o o
+ - - - o o o o o o o
+ x x x o o o o o o o
+ x x x o o o o o o o
+ x x x o o o o o o o
+ - o - o o o o o o o
+ o o o o o o o o o o
+ o o o o o o o o o o
+ o o o o o o o o o o
+ 
+ x x x x - - - x x x
+ x x x - o o o - x x
+ x x x - o o o - x x
+ x x x x x o x x x x
+ x x x x x - x x x x
+ x x x x x o x x x x
+ - o - x x - x x x x
+ x - x x x x x x x x
+ x x x x x x x x x x
+ x x x x x x x x x x
+ 
+ x x x x x x x x x x
+ x x x x x x x x x x
+ o o o x x x x x x x
+ o o o x x - x x x x
+ o o o o o o x x x x
+ x o x x x x x x x x
+ x - x x x x x x x x
+ x x x x x x x x x x
+ x x x x x x x x x x
+ x x x x x x x x x x
+ 
+ x x x x x x x x x x
+ x x x x x x x x x x
+ x x x x x x x x x x
+ x x x x x x x x x x
+ x x x x x x x x x x
+ x x x x x x x x x x
+ x x x x x x x x x x
+ x x x x x x x x x x
+ x x x x x x x x x x
+ x x x x x x x x x x
