@@ -59,7 +59,7 @@ public static class HeroFactory
     {
         hero.transform.position = new Vector3(
             startingPoint.Position.x * MapFactory.MapTileWidth,
-            (mapHeights[startingPoint.Position] - 2) * MapFactory.MapTileHeight,
+            (mapHeights[startingPoint.Position] - 1) * MapFactory.MapTileHeight,
             startingPoint.Position.y * MapFactory.MapTileWidth);
     }
 }
