@@ -5,13 +5,14 @@ using System.Text.RegularExpressions;
 
 public static class MapFactory {
 
+    public const float MapTileHeight = 0.5f;
+    public const float MapTileWidth = 1f;
+
     private const string MapTextAssetPath = "Maps/";
 
     private const string MapTileObjectReference = "Map/MapTile";
     private const string MapTileDirtReference = "Map/MapTileDirt";
     private const string MapTileGrassReference = "Map/MapTileGrass";
-    private const float MapTileHeight = 0.5f;
-    private const float MapTileWidth = 1f;
 
     /// <summary>
     /// Hacky way to generate a map for the prototype.
