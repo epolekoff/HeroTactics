@@ -7,6 +7,12 @@ public class GameCamera : MonoBehaviour
 
     private const float CameraPanSpeed = 3f;
     private const float CameraRotateIncrement = 90f;
+    private const float CameraLerpTime = 0.5f;
+
+
+    private bool m_cameraAnimating;
+    private Quaternion m_desiredRotation;
+    private Vector3 m_desiredPosition;
 
 	// Use this for initialization
 	void Start () {
@@ -42,11 +48,11 @@ public class GameCamera : MonoBehaviour
         }
 
         // Rotate the camera
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.E))
         {
             RotateCamera(-1);
         }
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             RotateCamera(1);
         }
@@ -63,9 +69,72 @@ public class GameCamera : MonoBehaviour
 
     private void RotateCamera(int direction)
     {
-        transform.rotation = Quaternion.Euler(
-            transform.rotation.eulerAngles.x,
-            transform.rotation.eulerAngles.y + CameraRotateIncrement * Mathf.Sign(direction),
-            transform.rotation.eulerAngles.z);
+        if(m_cameraAnimating)
+        {
+            return;
+        }
+
+        float angle = CameraRotateIncrement * Mathf.Sign(direction);
+
+        // Raycast to hit a tile.
+        RaycastHit hit;
+        if(Physics.Raycast(transform.position, transform.forward, out hit, 100f, LayerMask.GetMask("MapTile")))
+        {
+            // Rotate around the hit point.
+            Quaternion oldRotation = transform.rotation;
+            Vector3 oldPosition = transform.position;
+            transform.RotateAround(hit.point, Vector3.up, angle);
+
+            // Keep the camera looking at the point
+            transform.LookAt(hit.point);
+
+            // If the camera is too close to the point, move it back so it doesn't clip into the level
+            if(Vector3.Distance(transform.position, hit.point) < 10)
+            {
+                transform.position += transform.forward * -10;
+            }
+
+            // Start a coroutine to rotate the camera instead of snapping it.
+            m_desiredRotation = transform.rotation;
+            m_desiredPosition = transform.position;
+            transform.rotation = oldRotation;
+            transform.position = oldPosition;
+            StartCoroutine(LerpCameraToRotation());
+        }
+        else
+        {
+            // Rotate the camera manually by euler angles and keep it isometric.
+            transform.rotation = Quaternion.Euler(
+                transform.rotation.eulerAngles.x,
+                transform.rotation.eulerAngles.y + CameraRotateIncrement * Mathf.Sign(direction),
+                transform.rotation.eulerAngles.z);
+        }
+    }
+
+    /// <summary>
+    /// Coroutine to move the camera into place over time.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator LerpCameraToRotation()
+    {
+        m_cameraAnimating = true;
+
+        float timer = 0;
+
+        Quaternion startRotation = transform.rotation;
+        Vector3 startPosition = transform.position;
+
+        while(timer < CameraLerpTime)
+        {
+            timer += Time.deltaTime;
+            float ratio = timer / CameraLerpTime;
+
+            transform.rotation = Quaternion.Lerp(startRotation, m_desiredRotation, ratio);
+            transform.position = Vector3.Lerp(startPosition, m_desiredPosition, ratio);
+
+            yield return new WaitForEndOfFrame();
+        }
+
+        m_cameraAnimating = false;
     }
 }
