@@ -19,10 +19,15 @@ public class Hero : MonoBehaviour
     /// </summary>
     public GameObject Visual;
 
+
+    public Vector2 CurrentTilePosition { get; set; }
+
+
 	// Use this for initialization
 	void Start () {
-		
-	}
+
+
+    }
 	
 	// Update is called once per frame
 	void Update ()
@@ -36,6 +41,10 @@ public class Hero : MonoBehaviour
     /// </summary>
     private void BillboardHeroSprite()
     {
-        Visual.transform.LookAt(Camera.main.transform);
+        // Look at the camera
+        //Visual.transform.LookAt(Camera.main.transform);
+
+        // Keep the sprites Isometric
+        Visual.transform.rotation = Camera.main.transform.rotation;
     }
 }
