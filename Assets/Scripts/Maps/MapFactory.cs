@@ -3,6 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Text.RegularExpressions;
 
+/// <summary>
+/// Data read from the map file.
+/// This may be placeholder until a better map system is in place.
+/// </summary>
+public struct MapFileData
+{
+    public Dictionary<Vector2, int> TileHeights;
+    public int Width;
+    public int Depth;
+}
+
 public static class MapFactory {
 
     public const float MapTileHeight = 0.5f;
@@ -19,13 +30,15 @@ public static class MapFactory {
     /// Read the map file and generate a number of tiles based on the height at each position.
     /// </summary>
     /// <param name="filename"></param>
-	public static Dictionary<Vector2, int> ReadMap(string filename)
+	public static MapFileData ReadMap(string filename)
     {
         TextAsset mapTextAsset = Resources.Load(MapTextAssetPath + filename) as TextAsset;
 
         // Iterate the lines of the map and place them into a 2D array.
-        Dictionary<Vector2, int> mapHeights = new Dictionary<Vector2, int>();
+        MapFileData mapData = new MapFileData();
+        mapData.TileHeights = new Dictionary<Vector2, int>();
         int y = 0;
+        int x = 0;
         foreach (var line in mapTextAsset.text.Split(new[] { '\n', '\r'}))
         {
             if(line.Length == 0 ||  line.Contains("#"))
@@ -34,52 +47,61 @@ public static class MapFactory {
             }
 
             List<int> lineHeights = new List<int>();
-            int x = 0;
+            x = 0;
             string lineWithoutSpaces = line.Replace(" ", string.Empty);
             foreach(var character in lineWithoutSpaces)
             {
                 int height = int.Parse(character.ToString());
                 lineHeights.Add(height);
-                mapHeights.Add(new Vector2(x, y), height);
+                mapData.TileHeights.Add(new Vector2(x, y), height);
                 x++;
             }
             y++;
         }
 
-        return mapHeights;
+        mapData.Width = x;
+        mapData.Depth = y;
+
+        return mapData;
     }
 
     /// <summary>
     /// Generate all of the tiles and align them properly.
     /// </summary>
-    /// <param name="mapHeights"></param>
     /// <returns></returns>
-    public static GameObject GenerateMap(Dictionary<Vector2, int> mapHeights)
+    public static GameMap GenerateMap(MapFileData mapData)
     {
+        // Create the map object.
         GameObject mapObject = new GameObject("Map");
-        foreach(var kvp in mapHeights)
+        GameMap gameMap = mapObject.AddComponent<GameMap>();
+        gameMap.Intialize(mapData.Width, mapData.Depth);
+
+        // Create the tiles.
+        foreach (var kvp in mapData.TileHeights)
         {
-            GenerateMapTile(kvp.Key, kvp.Value, mapObject);
+            List<MapTile> tilesAtPosition = GenerateMapTile(kvp.Key, kvp.Value, gameMap);
         }
 
-        return mapObject;
+        return gameMap;
     }
 
     /// <summary>
     /// Instantiate a map tile at the correct position.
     /// </summary>
-    private static void GenerateMapTile(Vector2 tile, int height, GameObject mapParent)
+    private static List<MapTile> GenerateMapTile(Vector2 tile, int height, GameMap gameMap)
     {
         var mapTileResource = Resources.Load(MapTileObjectReference);
         var dirt = Resources.Load(MapTileDirtReference) as Material;
         var grass = Resources.Load(MapTileGrassReference) as Material;
+
+        List<MapTile> mapTilesOnPoint = new List<MapTile>();
         for (int i = 0; i < height; i++)
         {
             var mapTileObject = GameObject.Instantiate(
                 mapTileResource,
                 new Vector3(tile.x * MapTileWidth, i * MapTileHeight, tile.y * MapTileWidth),
                 Quaternion.identity,
-                mapParent.transform) as GameObject;
+                gameMap.transform) as GameObject;
 
             // Set the tile as dirt or grass.
             if(i == height - 1)
@@ -90,6 +112,15 @@ public static class MapFactory {
             {
                 mapTileObject.GetComponentInChildren<Renderer>().material = dirt;
             }
+
+            // Initialization
+            MapTile newTile = mapTileObject.GetComponent<MapTile>();
+            newTile.Position = new Vector3(tile.x, i, tile.y);
+            newTile.RegisterToMap(gameMap);
+
+            mapTilesOnPoint.Add(newTile);
         }
+
+        return mapTilesOnPoint;
     }
 }

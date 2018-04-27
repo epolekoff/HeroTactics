@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NewHero", menuName = "Hero/HeroStats", order = 1)]
-public class HeroStats : ScriptableObject {
+public class UnitStats : ScriptableObject
+{
 
     /// <summary>
     /// The name to display for this hero.
@@ -12,13 +12,13 @@ public class HeroStats : ScriptableObject {
     public string DisplayName;
 
     /// <summary>
-    /// Health of this hero.
+    /// Health of this unit.
     /// </summary>
     [SerializeField()]
     public int MaxHealth;
 
     /// <summary>
-    /// Movement range for this hero.
+    /// Movement range for this unit.
     /// </summary>
     [SerializeField()]
     public int MovementRange;

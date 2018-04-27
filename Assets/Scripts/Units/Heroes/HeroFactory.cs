@@ -16,7 +16,7 @@ public static class HeroFactory
     /// </summary>
     /// <param name="heroRegistry"></param>
     /// <returns></returns>
-    public static List<Hero> CreateAllHeroesAtTestStartingPoints(HeroRegistry heroRegistry, List<HeroMapStartingPoint> startingPoints, Dictionary<Vector2, int> mapHeights)
+    public static List<Hero> CreateAllHeroesAtTestStartingPoints(HeroRegistry heroRegistry, List<HeroMapStartingPoint> startingPoints, GameMap map)
     {
         List<Hero> newHeroes = new List<Hero>();
 
@@ -26,7 +26,7 @@ public static class HeroFactory
             newHeroes.Add(newHero);
 
             // Position the heroes at their starting points.
-            PositionHeroOnMap(newHero, startingPoint, mapHeights);
+            map.MoveObjectToTile(newHero, startingPoint.Position, true);
         }
 
         return newHeroes;
@@ -50,16 +50,5 @@ public static class HeroFactory
         hero.HeroId = id;
 
         return hero;
-    }
-
-    /// <summary>
-    /// Align the created hero on the map tile that it should start on.
-    /// </summary>
-    private static void PositionHeroOnMap(Hero hero, HeroMapStartingPoint startingPoint, Dictionary<Vector2, int> mapHeights)
-    {
-        hero.transform.position = new Vector3(
-            startingPoint.Position.x * MapFactory.MapTileWidth,
-            (mapHeights[startingPoint.Position] - 1) * MapFactory.MapTileHeight,
-            startingPoint.Position.y * MapFactory.MapTileWidth);
     }
 }

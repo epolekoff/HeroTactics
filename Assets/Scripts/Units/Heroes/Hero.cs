@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Hero : MonoBehaviour
+public class Hero : Unit
 {
     /// <summary>
     /// The hero that this object represents.
@@ -10,18 +10,9 @@ public class Hero : MonoBehaviour
     public HeroId HeroId;
 
     /// <summary>
-    /// Stats for this character.
+    /// Heroes are not enemies.
     /// </summary>
-    public HeroStats Stats;
-
-    /// <summary>
-    /// The sprite representing this character.
-    /// </summary>
-    public GameObject Visual;
-
-
-    public Vector2 CurrentTilePosition { get; set; }
-
+    public override bool IsEnemy {  get { return false; } }
 
 	// Use this for initialization
 	void Start () {

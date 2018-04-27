@@ -15,24 +15,38 @@ public class GameManager : Singleton<GameManager> {
     /// </summary>
     public List<HeroMapStartingPoint> DemoStartingPoints;
 
+    /// <summary>
+    /// Get access to the map.
+    /// </summary>
+    public GameMap Map { get { return m_map; } }
+
+    /// <summary>
+    /// Get access to the heroes.
+    /// </summary>
+    public List<Hero> Heroes { get { return m_heroes; } }
+
+
     private List<Hero> m_heroes;
+    private GameMap m_map;
 
-	// Use this for initialization
-	void Start ()
+	/// <summary>
+    /// Initialization
+    /// </summary>
+	void Awake ()
     {
-
         // Generate the map
-        Dictionary<Vector2, int> mapHeights = MapFactory.ReadMap("TestLevelHeight");
-        MapFactory.GenerateMap(mapHeights);
+        MapFileData mapData = MapFactory.ReadMap("TestLevelHeight");
+        m_map = MapFactory.GenerateMap(mapData);
 
         // Generate the heroes in the registry
-        m_heroes = HeroFactory.CreateAllHeroesAtTestStartingPoints(HeroRegistry, DemoStartingPoints, mapHeights);
-
+        m_heroes = HeroFactory.CreateAllHeroesAtTestStartingPoints(HeroRegistry, DemoStartingPoints, m_map);
     }
 	
-	// Update is called once per frame
+	/// <summary>
+    /// Update
+    /// </summary>
 	void Update ()
     {
-		
-	}
+
+    }
 }

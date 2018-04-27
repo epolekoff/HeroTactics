@@ -9,5 +9,5 @@ public class HeroMapStartingPoint {
     public HeroId Hero;
 
     [SerializeField()]
-    public Vector2 Position;
+    public Vector3 Position;
 }
