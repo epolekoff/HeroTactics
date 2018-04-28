@@ -2,8 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
-public class GameManager : Singleton<GameManager> {
+public class GameManager : Singleton<GameManager>, IStateMachineEntity
+{
+    /// <summary>
+    /// The camera.
+    /// </summary>
+    public GameCamera GameCamera;
 
     /// <summary>
     /// A mapping of legal hero ids to their prefabs.
@@ -25,21 +31,34 @@ public class GameManager : Singleton<GameManager> {
     /// </summary>
     public List<Hero> Heroes { get { return m_heroes; } }
 
+    /// <summary>
+    /// The players in the game (probably only 1).
+    /// </summary>
+    public Player Player;
 
     private List<Hero> m_heroes;
     private GameMap m_map;
 
-	/// <summary>
+    private FiniteStateMachine m_stateMachine;
+    public FiniteStateMachine GetStateMachine(int number = 0) { return m_stateMachine; }
+
+    /// <summary>
     /// Initialization
     /// </summary>
-	void Awake ()
+    void Awake ()
     {
+        // Create the player object.
+        Player = new Player();
+
         // Generate the map
         MapFileData mapData = MapFactory.ReadMap("TestLevelHeight");
         m_map = MapFactory.GenerateMap(mapData);
 
         // Generate the heroes in the registry
         m_heroes = HeroFactory.CreateAllHeroesAtTestStartingPoints(HeroRegistry, DemoStartingPoints, m_map);
+
+        // Set up the state machine
+        m_stateMachine = new FiniteStateMachine(new PlayerTurnState(), this);
     }
 	
 	/// <summary>
@@ -47,6 +66,6 @@ public class GameManager : Singleton<GameManager> {
     /// </summary>
 	void Update ()
     {
-
+        m_stateMachine.Update();
     }
 }

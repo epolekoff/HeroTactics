@@ -34,8 +34,8 @@ public class MapTile : MonoBehaviour {
     /// <summary>
     /// Start
     /// </summary>
-    void Start () {
-        RegisterToMap(GameManager.Instance.Map);
+    void Start ()
+    {
     }
 	
 	/// <summary>
@@ -53,7 +53,7 @@ public class MapTile : MonoBehaviour {
         // If the tile was already registered, remove it.
         if (gameMap.MapTiles.ContainsKey(Position))
         {
-            GameObject.Destroy(gameMap.MapTiles[Position]);
+            GameObject.Destroy(gameMap.MapTiles[Position].gameObject);
             gameMap.MapTiles.Remove(Position);
         }
 

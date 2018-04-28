@@ -109,6 +109,12 @@ public class GameMap : MonoBehaviour {
         int y = (int)tilePosition.y;
         int z = (int)tilePosition.z;
 
+        // If this tile itself does not exist, then we cannot get its neighbors.
+        if(!MapTiles.ContainsKey(tilePosition))
+        {
+            return new List<Vector3>();
+        }
+
         MapTile mapTile = MapTiles[tilePosition];
 
         List<Vector3> neighbors = new List<Vector3>();
@@ -177,8 +183,20 @@ public class GameMap : MonoBehaviour {
             return false;
         }
 
+        // The tile needs to exist.
+        if(!MapTiles.ContainsKey(tilePosition))
+        {
+            return false;
+        }
+
         // Check other unit objects on the tile.
         if (GetUnitOnTile(tilePosition))
+        {
+            return false;
+        }
+
+        // If a tile is directly above this tile, it cannot be stood on.
+        if(MapTiles.ContainsKey(tilePosition + Vector3.up))
         {
             return false;
         }
@@ -189,24 +207,24 @@ public class GameMap : MonoBehaviour {
     /// <summary>
     /// Recurse through all neighbors and get a list of tiles in range, without duplicates.
     /// </summary>
-    public List<Vector2> GetAllTilesInRange(Vector2 tile, int range)
+    public List<Vector3> GetAllTilesInRange(Vector3 tile, int range)
     {
         // Get all tiles, filter out duplicates.
-        HashSet<Vector2> tilesInRangeNoDuplicates = new HashSet<Vector2>();
-        List<Vector2> allTilesInRange = GetAllTilesInRangeRecursive(tile, 0, range);
+        HashSet<Vector3> tilesInRangeNoDuplicates = new HashSet<Vector3>();
+        List<Vector3> allTilesInRange = GetAllTilesInRangeRecursive(tile, 0, range);
         foreach (var potentialTile in allTilesInRange)
         {
             tilesInRangeNoDuplicates.Add(potentialTile);
         }
 
-        return new List<Vector2>(tilesInRangeNoDuplicates);
+        return new List<Vector3>(tilesInRangeNoDuplicates);
     }
 
-    private List<Vector2> GetAllTilesInRangeRecursive(Vector2 tile, int depth, int maxDepth)
+    private List<Vector3> GetAllTilesInRangeRecursive(Vector3 tile, int depth, int maxDepth)
     {
         if (depth == maxDepth)
         {
-            List<Vector2> list = new List<Vector2>();
+            List<Vector3> list = new List<Vector3>();
             if (IsValidTile(tile))
             {
                 list.Add(tile);
@@ -215,7 +233,7 @@ public class GameMap : MonoBehaviour {
         }
 
         // Keep recursing.
-        List<Vector2> totalList = new List<Vector2>();
+        List<Vector3> totalList = new List<Vector3>();
         if (IsValidTile(tile))
         {
             totalList.Add(tile);
@@ -236,8 +254,8 @@ public class GameMap : MonoBehaviour {
 
         HighlightState highlight = unit.IsEnemy ? HighlightState.Enemy : HighlightState.Friendly;
 
-        List<Vector2> allTilesInRange = GetAllTilesInRange(unit.TilePosition, unit.Stats.MovementRange);
-        foreach (Vector2 tile in allTilesInRange)
+        List<Vector3> allTilesInRange = GetAllTilesInRange(unit.TilePosition, unit.Stats.MovementRange);
+        foreach (Vector3 tile in allTilesInRange)
         {
             if (MapTiles.ContainsKey(tile))
             {
