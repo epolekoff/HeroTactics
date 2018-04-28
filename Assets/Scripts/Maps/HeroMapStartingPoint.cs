@@ -6,7 +6,17 @@ using UnityEngine;
 public class HeroMapStartingPoint {
 
     [SerializeField()]
-    public HeroId Hero;
+    public HeroType Hero;
+
+    [SerializeField()]
+    public Vector3 Position;
+}
+
+[System.Serializable()]
+public class EnemyMapStartingPoint
+{
+    [SerializeField()]
+    public EnemyType Enemy;
 
     [SerializeField()]
     public Vector3 Position;

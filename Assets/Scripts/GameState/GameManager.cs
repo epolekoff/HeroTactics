@@ -12,14 +12,16 @@ public class GameManager : Singleton<GameManager>, IStateMachineEntity
     public GameCamera GameCamera;
 
     /// <summary>
-    /// A mapping of legal hero ids to their prefabs.
+    /// A mapping of legal unit ids to their prefabs.
     /// </summary>
     public HeroRegistry HeroRegistry;
+    public EnemyRegistry EnemyRegistry;
 
     /// <summary>
     /// For demo purposes, where to the heroes each start.
     /// </summary>
     public List<HeroMapStartingPoint> DemoStartingPoints;
+    public List<EnemyMapStartingPoint> DemoEnemyStartingPoints;
 
     /// <summary>
     /// Get access to the map.
@@ -37,6 +39,7 @@ public class GameManager : Singleton<GameManager>, IStateMachineEntity
     public Player Player;
 
     private List<Hero> m_heroes;
+    private List<Enemy> m_enemies;
     private GameMap m_map;
 
     private FiniteStateMachine m_stateMachine;
@@ -56,6 +59,9 @@ public class GameManager : Singleton<GameManager>, IStateMachineEntity
 
         // Generate the heroes in the registry
         m_heroes = HeroFactory.CreateAllHeroesAtTestStartingPoints(HeroRegistry, DemoStartingPoints, m_map);
+
+        // Generate the enemies in the registry
+        m_enemies = EnemyFactory.CreateAllEnemiesAtTestStartingPoints(EnemyRegistry, DemoEnemyStartingPoints, m_map);
 
         // Set up the state machine
         m_stateMachine = new FiniteStateMachine(new PlayerTurnState(), this);

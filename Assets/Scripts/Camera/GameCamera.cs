@@ -7,7 +7,11 @@ public class GameCamera : MonoBehaviour
 
     private const float CameraPanSpeed = 3f;
     private const float CameraRotateIncrement = 90f;
-    private const float CameraLerpTime = 0.5f;
+    private const float CameraLerpTime = 0.35f;
+    
+    public const float CameraZoomSpeed = 1f;
+    private const float CameraSizeMin = 4;
+    private const float CameraSizeMax = 24;
 
 
     private bool m_cameraAnimating;
@@ -56,6 +60,9 @@ public class GameCamera : MonoBehaviour
         {
             RotateCamera(1);
         }
+
+        // Handle scrolling
+        ZoomCamera(-Input.mouseScrollDelta.y * GameCamera.CameraZoomSpeed);
     }
 
     /// <summary>
@@ -136,5 +143,16 @@ public class GameCamera : MonoBehaviour
         }
 
         m_cameraAnimating = false;
+    }
+
+    /// <summary>
+    /// Scroll to zoom
+    /// </summary>
+    private void ZoomCamera(float zoomAmount)
+    {
+        float currentSize = GetComponent<Camera>().orthographicSize;
+        currentSize += zoomAmount;
+
+        GetComponent<Camera>().orthographicSize = Mathf.Clamp(currentSize, CameraSizeMin, CameraSizeMax);
     }
 }

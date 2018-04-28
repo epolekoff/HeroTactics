@@ -97,14 +97,17 @@ public static class MapFactory {
         List<MapTile> mapTilesOnPoint = new List<MapTile>();
         for (int i = 0; i < height; i++)
         {
+            float x = tile.x * MapTileWidth;
+            float y = i * MapTileHeight;
+            float z = tile.y * MapTileWidth;
             var mapTileObject = GameObject.Instantiate(
                 mapTileResource,
-                new Vector3(tile.x * MapTileWidth, i * MapTileHeight, tile.y * MapTileWidth),
+                new Vector3(x, y, z),
                 Quaternion.identity,
                 gameMap.transform) as GameObject;
 
             // Set the tile as dirt or grass.
-            if(i == height - 1)
+            if (i == height - 1)
             {
                 mapTileObject.GetComponentInChildren<Renderer>().material = grass;
             }
@@ -116,6 +119,7 @@ public static class MapFactory {
             // Initialization
             MapTile newTile = mapTileObject.GetComponent<MapTile>();
             newTile.Position = new Vector3(tile.x, i, tile.y);
+            mapTileObject.name = string.Format("MapTile({0},{1},{2})", (int)tile.x, (int)i, (int)tile.y);
             newTile.RegisterToMap(gameMap);
 
             mapTilesOnPoint.Add(newTile);

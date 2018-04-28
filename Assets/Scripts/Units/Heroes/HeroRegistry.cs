@@ -16,7 +16,7 @@ public class HeroRegistryEntry
     /// The hero representing this prefab.
     /// </summary>
     [SerializeField()]
-    public HeroId HeroId;
+    public HeroType HeroType;
 
     /// <summary>
     /// Where the prefab for this hero is located.

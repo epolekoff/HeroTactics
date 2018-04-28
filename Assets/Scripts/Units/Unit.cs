@@ -23,4 +23,23 @@ public abstract class Unit : MonoBehaviour{
     /// Is this unit an enemy?
     /// </summary>
     public virtual bool IsEnemy { get; set; }
+
+    // Update is called once per frame
+    void Update()
+    {
+        // Keep the sprite billboarded.
+        BillboardHeroSprite();
+    }
+
+    /// <summary>
+    /// Keep the sprite facing the camera.
+    /// </summary>
+    private void BillboardHeroSprite()
+    {
+        // Look at the camera
+        //Visual.transform.LookAt(Camera.main.transform);
+
+        // Keep the sprites Isometric
+        Visual.transform.rotation = Camera.main.transform.rotation;
+    }
 }

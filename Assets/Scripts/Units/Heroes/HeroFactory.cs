@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public enum HeroId
+public enum HeroType
 {
     None,
     Luffy,
@@ -36,9 +36,9 @@ public static class HeroFactory
     /// Create a hero object. Requires a registry holding the matching prefab.
     /// </summary>
     /// <returns></returns>
-	public static Hero CreateHero(HeroRegistry heroRegistry, HeroId id)
+	public static Hero CreateHero(HeroRegistry heroRegistry, HeroType id)
     {
-        var heroObject = GameObject.Instantiate(heroRegistry.AllHeroes.FirstOrDefault(h => h.HeroId == id).HeroPrefab);
+        var heroObject = GameObject.Instantiate(heroRegistry.AllHeroes.FirstOrDefault(h => h.HeroType == id).HeroPrefab);
         if(heroObject == null || heroObject.GetComponent<Hero>() == null)
         {
             Debug.LogError("Unable to load hero " + id.ToString());
@@ -47,7 +47,7 @@ public static class HeroFactory
 
         // Set up the hero class.
         Hero hero = heroObject.GetComponent<Hero>();
-        hero.HeroId = id;
+        hero.HeroType = id;
 
         return hero;
     }
