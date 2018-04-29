@@ -13,7 +13,7 @@ public class GameMap : MonoBehaviour {
     public GameObject[,,] ObjectsOnTiles;
     public Dictionary<Vector3, MapTile> MapTiles = new Dictionary<Vector3, MapTile>();
 
-    private const float ShooterLerpTimePerTimeTraveled = 0.1f;
+    private const float UnitLerpTimePerTileTraveled = 0.1f;
 
     private List<MapTile> m_highlightedTiles = new List<MapTile>();
 
@@ -46,6 +46,21 @@ public class GameMap : MonoBehaviour {
             return;
         }
 
+        // Move the game object
+        if (firstTimeSetup)
+        {
+            unit.transform.position = GetWorldSpacePositionOfMapTilePosition(tilePosition); 
+        }
+        else
+        {
+            // Get the path of travel
+            MapTile start = MapTiles[unit.TilePosition];
+            MapTile goal = MapTiles[tilePosition];
+            List<MapTile> path = Pathfinder.GetPath(start, goal);
+
+            StartCoroutine(LerpObjectAlongPath(unit.transform, path, callback));
+        }
+
         // Get the shooter's old position
         Vector3 oldPosition = unit.TilePosition;
 
@@ -53,27 +68,22 @@ public class GameMap : MonoBehaviour {
         ObjectsOnTiles[(int)tilePosition.x, (int)tilePosition.y, (int)tilePosition.z] = unit.gameObject;
         unit.TilePosition = tilePosition;
 
-        int distanceTraveled = (int)Mathf.Abs(oldPosition.x - (int)tilePosition.x) + (int)Mathf.Abs(oldPosition.z - (int)tilePosition.z);
-
-        // Move the game object
-        Vector3 desiredPosition = new Vector3(
-            tilePosition.x * MapTile.Width,
-            MapTile.Height * MapTiles[unit.TilePosition].Position.y,
-            tilePosition.z * MapTile.Width);
-        if (firstTimeSetup)
-        {
-            unit.transform.position = desiredPosition;
-        }
-        else
-        {
-            StartCoroutine(LerpObjectToPosition(unit.transform, desiredPosition, distanceTraveled, callback));
-        }
-
         // Delete the object from the old position
         if (!firstTimeSetup)
         {
             ObjectsOnTiles[(int)oldPosition.x, (int)oldPosition.y, (int)oldPosition.z] = null;
         }
+    }
+
+    /// <summary>
+    /// Given a map tile position, get its world space position.
+    /// </summary>
+    public Vector3 GetWorldSpacePositionOfMapTilePosition(Vector3 mapTilePosition)
+    {
+        return new Vector3(
+            mapTilePosition.x * MapTile.Width,
+            MapTile.Height * MapTiles[mapTilePosition].Position.y,
+            mapTilePosition.z * MapTile.Width);
     }
 
     /// <summary>
@@ -276,25 +286,26 @@ public class GameMap : MonoBehaviour {
     }
 
     /// <summary>
-    /// Smoothely move shooter to the correct time.
+    /// Smoothely move unit to the correct tile through a path.
     /// </summary>
     /// <returns></returns>
-    private IEnumerator LerpObjectToPosition(Transform transform, Vector3 desiredPosition, int distanceTraveled, System.Action callback)
+    private IEnumerator LerpObjectAlongPath(Transform transform, List<MapTile> path, System.Action callback)
     {
-        float lerpTime = distanceTraveled * ShooterLerpTimePerTimeTraveled;
-        Vector3 startPosition = transform.position;
-        float timer = 0;
-
-        while (timer < lerpTime)
+        for(int i = 0; i < path.Count; i++)
         {
-            timer += Time.deltaTime;
-            var ratio = timer / lerpTime;
+            float timer = 0;
+            Vector3 startPosition = transform.position;
+            Vector3 desiredPosition = GetWorldSpacePositionOfMapTilePosition(path[i].Position);
+            while (timer < UnitLerpTimePerTileTraveled)
+            {
+                timer += Time.deltaTime;
+                var ratio = timer / UnitLerpTimePerTileTraveled;
 
-            transform.position = Vector3.Lerp(startPosition, desiredPosition, ratio);
+                transform.position = Vector3.Lerp(startPosition, desiredPosition, ratio);
 
-            yield return new WaitForEndOfFrame();
+                yield return new WaitForEndOfFrame();
+            }
         }
-
         if (callback != null)
         {
             callback();
