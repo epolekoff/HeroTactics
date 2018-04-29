@@ -29,18 +29,16 @@ public class GameManager : Singleton<GameManager>, IStateMachineEntity
     public GameMap Map { get { return m_map; } }
 
     /// <summary>
-    /// Get access to the heroes.
+    /// The players in the game.
     /// </summary>
-    public List<Hero> Heroes { get { return m_heroes; } }
+    public Player CurrentPlayer;
+    public HumanPlayer HumanPlayer;
+    public EnemyPlayer EnemyPlayer;
 
-    /// <summary>
-    /// The players in the game (probably only 1).
-    /// </summary>
-    public Player Player;
-
-    private List<Hero> m_heroes;
-    private List<Enemy> m_enemies;
+    private List<Unit> m_heroes;
+    private List<Unit> m_enemies;
     private GameMap m_map;
+    private bool m_currentPlayerIsHuman = true;
 
     private FiniteStateMachine m_stateMachine;
     public FiniteStateMachine GetStateMachine(int number = 0) { return m_stateMachine; }
@@ -50,9 +48,6 @@ public class GameManager : Singleton<GameManager>, IStateMachineEntity
     /// </summary>
     void Awake ()
     {
-        // Create the player object.
-        Player = new Player();
-
         // Generate the map
         MapFileData mapData = MapFactory.ReadMap("TestLevelHeight");
         m_map = MapFactory.GenerateMap(mapData);
@@ -62,6 +57,11 @@ public class GameManager : Singleton<GameManager>, IStateMachineEntity
 
         // Generate the enemies in the registry
         m_enemies = EnemyFactory.CreateAllEnemiesAtTestStartingPoints(EnemyRegistry, DemoEnemyStartingPoints, m_map);
+
+        // Create the player objects.
+        HumanPlayer = new HumanPlayer((List<Unit>)m_heroes);
+        EnemyPlayer = new EnemyPlayer(m_enemies);
+        CurrentPlayer = HumanPlayer;
 
         // Set up the state machine
         m_stateMachine = new FiniteStateMachine(new PlayerTurnState(), this);
@@ -73,5 +73,24 @@ public class GameManager : Singleton<GameManager>, IStateMachineEntity
 	void Update ()
     {
         m_stateMachine.Update();
+    }
+
+    // End the current player's turn and transition to the next player's turn.
+    public void EndCurrentPlayersTurn()
+    {
+        // Figure out who the new current player is.
+        Player lastTurnPlayer = CurrentPlayer;
+        if(m_currentPlayerIsHuman)
+        {
+            CurrentPlayer = EnemyPlayer;
+        }
+        else
+        {
+            CurrentPlayer = HumanPlayer;
+        }
+        m_currentPlayerIsHuman = !m_currentPlayerIsHuman;
+
+        // Tell the new player that it is their turn.
+        CurrentPlayer.StartNewTurn();
     }
 }

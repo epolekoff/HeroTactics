@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SelectUnitState : AbsState
 {
-    private Player m_player;
+    private HumanPlayer m_player;
 
     /// <summary>
     /// Enter
@@ -15,7 +15,7 @@ public class SelectUnitState : AbsState
         base.Enter(entity);
 
         // Store the player for ease of access.
-        m_player = ((Player)entity);
+        m_player = ((HumanPlayer)entity);
     }
 
     /// <summary>
@@ -27,7 +27,7 @@ public class SelectUnitState : AbsState
         base.Enter(entity);
 
         // Check if the player clicked on a tile, and handle it if they did.
-        ((Player)entity).CheckClickOnTile(OnTileClicked);
+        ((HumanPlayer)entity).CheckClickOnTile(OnTileClicked);
     }
 
     /// <summary>
@@ -54,23 +54,32 @@ public class SelectUnitState : AbsState
         Unit unitOnTile = map.GetUnitOnTile(tile.Position);
 
         // If clicking a tile with a unit, select the unit
-        if (unitOnTile != null)
+        if (unitOnTile != null && unitOnTile.CanMove())
         {
             m_player.SelectUnit(unitOnTile);
         }
         // If clicking a blue highlight, move there.
         else if (tile.HighlightState == HighlightState.Friendly && m_player.SelectedUnit != null)
         {
-            // Move there
-            map.MoveObjectToTile(m_player.SelectedUnit, tile.Position, false, null);
+            // Move the selected unit to the tile.
+            m_player.MoveUnitToTile(m_player.SelectedUnit, tile.Position, OnUnitFinishedMoving);
 
-            // Clear all highlights
-            GameManager.Instance.Map.ClearHighlightedTiles();
+            // Watch the unit move.
+            m_player.GetStateMachine().ChangeState(new WatchUnitMoveState());
         }
         // If clicking any other tile, deselect the unit and hide the move range.
         else
         {
             m_player.DeselectUnit();
         }
+    }
+
+    /// <summary>
+    /// Callback for when the unit finishes moving.
+    /// </summary>
+    private void OnUnitFinishedMoving()
+    {
+        // When a unit finishes moving, allow the player to select the next unit again.
+        m_player.GetStateMachine().ChangeState(new SelectUnitState());
     }
 }

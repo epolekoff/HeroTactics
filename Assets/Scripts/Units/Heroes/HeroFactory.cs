@@ -16,9 +16,9 @@ public static class HeroFactory
     /// </summary>
     /// <param name="heroRegistry"></param>
     /// <returns></returns>
-    public static List<Hero> CreateAllHeroesAtTestStartingPoints(HeroRegistry heroRegistry, List<HeroMapStartingPoint> startingPoints, GameMap map)
+    public static List<Unit> CreateAllHeroesAtTestStartingPoints(HeroRegistry heroRegistry, List<HeroMapStartingPoint> startingPoints, GameMap map)
     {
-        List<Hero> newHeroes = new List<Hero>();
+        List<Unit> newHeroes = new List<Unit>();
 
         foreach(var startingPoint in startingPoints)
         {

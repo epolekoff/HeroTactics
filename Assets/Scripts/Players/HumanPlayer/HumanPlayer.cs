@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : IStateMachineEntity
+public class HumanPlayer : Player, IStateMachineEntity
 {
     
     public Unit SelectedUnit;
@@ -18,17 +18,22 @@ public class Player : IStateMachineEntity
     /// <summary>
     /// Constructor
     /// </summary>
-    public Player()
+    public HumanPlayer(List<Unit> myUnits)
     {
+        m_myUnits = myUnits;
         m_stateMachine = new FiniteStateMachine(new SelectUnitState(), this);
     }
 
     /// <summary>
     /// Update
     /// </summary>
-    public void Update()
+    public override void Update()
     {
+        // Update the state machine
         m_stateMachine.Update();
+
+        // Check if the turn is over.
+        CheckTurnHasEnded();
     }
 
     /// <summary>
@@ -57,6 +62,31 @@ public class Player : IStateMachineEntity
                 
             }
         }
+    }
+
+    /// <summary>
+    /// Called when a new turn is started for me.
+    /// </summary>
+    public override void StartNewTurn()
+    {
+
+    }
+
+    /// <summary>
+    /// Check if I've moved all my characters.
+    /// </summary>
+    private void CheckTurnHasEnded()
+    {
+        foreach(Unit unit in m_myUnits)
+        {
+            if(!unit.HasMovedThisTurn)
+            {
+                return;
+            }
+        }
+
+        // If we got here, the turn should end.
+        EndTurn();
     }
 
     /// <summary>

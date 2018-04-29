@@ -17,9 +17,9 @@ public static class EnemyFactory
     /// Create all of the specified enemies at their starting points.
     /// </summary>
     /// <returns></returns>
-    public static List<Enemy> CreateAllEnemiesAtTestStartingPoints(EnemyRegistry registry, List<EnemyMapStartingPoint> startingPoints, GameMap map)
+    public static List<Unit> CreateAllEnemiesAtTestStartingPoints(EnemyRegistry registry, List<EnemyMapStartingPoint> startingPoints, GameMap map)
     {
-        List<Enemy> newEnemies = new List<Enemy>();
+        List<Unit> newEnemies = new List<Unit>();
 
         foreach (var startingPoint in startingPoints)
         {

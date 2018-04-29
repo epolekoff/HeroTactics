@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerTurnState : AbsState
+public class WatchUnitMoveState : AbsState
 {
     /// <summary>
     /// Enter
@@ -19,9 +19,7 @@ public class PlayerTurnState : AbsState
     /// <param name="entity"></param>
     public override void Update(IStateMachineEntity entity)
     {
-        base.Update(entity);
-
-        ((GameManager)entity).CurrentPlayer.Update();
+        base.Enter(entity);
     }
 
     /// <summary>
