@@ -46,6 +46,25 @@ public class MapTile : MonoBehaviour {
 	}
 
     /// <summary>
+    /// Equals just checks the tile position.
+    /// </summary>
+    public override bool Equals(object other)
+    {
+        MapTile otherTile = (MapTile)other;
+
+        return Position == otherTile.Position;
+    }
+
+    /// <summary>
+    /// Get Hash Code.
+    /// </summary>
+    /// <returns></returns>
+    public override int GetHashCode()
+    {
+        return Position.GetHashCode();
+    }
+
+    /// <summary>
     /// When creating the map tiles, hook them up to be reverse engineered.
     /// </summary>
     public void RegisterToMap(GameMap gameMap)

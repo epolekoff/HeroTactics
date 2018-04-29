@@ -103,7 +103,7 @@ public class GameMap : MonoBehaviour {
     /// <summary>
     /// Get the neighbors of this tile.
     /// </summary>
-    public List<Vector3> GetValidNeighbors(Vector3 tilePosition)
+    public List<MapTile> GetValidNeighbors(Vector3 tilePosition)
     {
         int x = (int)tilePosition.x;
         int y = (int)tilePosition.y;
@@ -112,12 +112,12 @@ public class GameMap : MonoBehaviour {
         // If this tile itself does not exist, then we cannot get its neighbors.
         if(!MapTiles.ContainsKey(tilePosition))
         {
-            return new List<Vector3>();
+            return new List<MapTile>();
         }
 
         MapTile mapTile = MapTiles[tilePosition];
 
-        List<Vector3> neighbors = new List<Vector3>();
+        List<MapTile> neighbors = new List<MapTile>();
 
         // Same elevation
         Vector3 left = new Vector3(x - 1, y, z);
@@ -140,32 +140,32 @@ public class GameMap : MonoBehaviour {
         Vector3 down_back = back - new Vector3(0, 1, 0);
 
 
-        if (IsValidTile(left) && Mathf.Abs(left.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(left);
-        if (IsValidTile(right) && Mathf.Abs(right.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(right);
-        if (IsValidTile(front) && Mathf.Abs(front.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(front);
-        if (IsValidTile(back) && Mathf.Abs(back.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(back);
+        if (IsValidTilePosition(left) && Mathf.Abs(left.z - tilePosition.z) <= ValidNeighborHeightDifference)
+            neighbors.Add(MapTiles[left]);
+        if (IsValidTilePosition(right) && Mathf.Abs(right.z - tilePosition.z) <= ValidNeighborHeightDifference)
+            neighbors.Add(MapTiles[right]);
+        if (IsValidTilePosition(front) && Mathf.Abs(front.z - tilePosition.z) <= ValidNeighborHeightDifference)
+            neighbors.Add(MapTiles[front]);
+        if (IsValidTilePosition(back) && Mathf.Abs(back.z - tilePosition.z) <= ValidNeighborHeightDifference)
+            neighbors.Add(MapTiles[back]);
 
-        if (IsValidTile(up_left) && Mathf.Abs(up_left.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(up_left);
-        if (IsValidTile(up_right) && Mathf.Abs(up_right.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(up_right);
-        if (IsValidTile(up_front) && Mathf.Abs(up_front.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(up_front);
-        if (IsValidTile(up_back) && Mathf.Abs(up_back.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(up_back);
+        if (IsValidTilePosition(up_left) && Mathf.Abs(up_left.z - tilePosition.z) <= ValidNeighborHeightDifference)
+            neighbors.Add(MapTiles[up_left]);
+        if (IsValidTilePosition(up_right) && Mathf.Abs(up_right.z - tilePosition.z) <= ValidNeighborHeightDifference)
+            neighbors.Add(MapTiles[up_right]);
+        if (IsValidTilePosition(up_front) && Mathf.Abs(up_front.z - tilePosition.z) <= ValidNeighborHeightDifference)
+            neighbors.Add(MapTiles[up_front]);
+        if (IsValidTilePosition(up_back) && Mathf.Abs(up_back.z - tilePosition.z) <= ValidNeighborHeightDifference)
+            neighbors.Add(MapTiles[up_back]);
 
-        if (IsValidTile(down_left) && Mathf.Abs(down_left.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(down_left);
-        if (IsValidTile(down_right) && Mathf.Abs(down_right.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(down_right);
-        if (IsValidTile(down_front) && Mathf.Abs(down_front.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(down_front);
-        if (IsValidTile(down_back) && Mathf.Abs(down_back.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(down_back);
+        if (IsValidTilePosition(down_left) && Mathf.Abs(down_left.z - tilePosition.z) <= ValidNeighborHeightDifference)
+            neighbors.Add(MapTiles[down_left]);
+        if (IsValidTilePosition(down_right) && Mathf.Abs(down_right.z - tilePosition.z) <= ValidNeighborHeightDifference)
+            neighbors.Add(MapTiles[down_right]);
+        if (IsValidTilePosition(down_front) && Mathf.Abs(down_front.z - tilePosition.z) <= ValidNeighborHeightDifference)
+            neighbors.Add(MapTiles[down_front]);
+        if (IsValidTilePosition(down_back) && Mathf.Abs(down_back.z - tilePosition.z) <= ValidNeighborHeightDifference)
+            neighbors.Add(MapTiles[down_back]);
 
         return neighbors;
     }
@@ -173,7 +173,7 @@ public class GameMap : MonoBehaviour {
     /// <summary>
     /// Is it valid to move to this tile.
     /// </summary>
-    public bool IsValidTile(Vector3 tilePosition)
+    public bool IsValidTilePosition(Vector3 tilePosition)
     {
         // Check against the map bounds.
         if (tilePosition.x < 0 || tilePosition.x >= Width ||
@@ -207,40 +207,40 @@ public class GameMap : MonoBehaviour {
     /// <summary>
     /// Recurse through all neighbors and get a list of tiles in range, without duplicates.
     /// </summary>
-    public List<Vector3> GetAllTilesInRange(Vector3 tile, int range)
+    public List<MapTile> GetAllTilesInRange(Vector3 tile, int range)
     {
         // Get all tiles, filter out duplicates.
-        HashSet<Vector3> tilesInRangeNoDuplicates = new HashSet<Vector3>();
-        List<Vector3> allTilesInRange = GetAllTilesInRangeRecursive(tile, 0, range);
+        HashSet<MapTile> tilesInRangeNoDuplicates = new HashSet<MapTile>();
+        List<MapTile> allTilesInRange = GetAllTilesInRangeRecursive(tile, 0, range);
         foreach (var potentialTile in allTilesInRange)
         {
             tilesInRangeNoDuplicates.Add(potentialTile);
         }
 
-        return new List<Vector3>(tilesInRangeNoDuplicates);
+        return new List<MapTile>(tilesInRangeNoDuplicates);
     }
 
-    private List<Vector3> GetAllTilesInRangeRecursive(Vector3 tile, int depth, int maxDepth)
+    private List<MapTile> GetAllTilesInRangeRecursive(Vector3 tilePosition, int depth, int maxDepth)
     {
         if (depth == maxDepth)
         {
-            List<Vector3> list = new List<Vector3>();
-            if (IsValidTile(tile))
+            List<MapTile> list = new List<MapTile>();
+            if (IsValidTilePosition(tilePosition))
             {
-                list.Add(tile);
+                list.Add(MapTiles[tilePosition]);
             }
             return list;
         }
 
         // Keep recursing.
-        List<Vector3> totalList = new List<Vector3>();
-        if (IsValidTile(tile))
+        List<MapTile> totalList = new List<MapTile>();
+        if (IsValidTilePosition(tilePosition))
         {
-            totalList.Add(tile);
+            totalList.Add(MapTiles[tilePosition]);
         }
-        foreach (var neighbor in GetValidNeighbors(tile))
+        foreach (var neighbor in GetValidNeighbors(tilePosition))
         {
-            totalList.AddRange(GetAllTilesInRangeRecursive(neighbor, depth + 1, maxDepth));
+            totalList.AddRange(GetAllTilesInRangeRecursive(neighbor.Position, depth + 1, maxDepth));
         }
         return totalList;
     }
@@ -254,15 +254,11 @@ public class GameMap : MonoBehaviour {
 
         HighlightState highlight = unit.IsEnemy ? HighlightState.Enemy : HighlightState.Friendly;
 
-        List<Vector3> allTilesInRange = GetAllTilesInRange(unit.TilePosition, unit.Stats.MovementRange);
-        foreach (Vector3 tile in allTilesInRange)
+        List<MapTile> allTilesInRange = GetAllTilesInRange(unit.TilePosition, unit.Stats.MovementRange);
+        foreach (MapTile tile in allTilesInRange)
         {
-            if (MapTiles.ContainsKey(tile))
-            {
-                MapTile mapTile = MapTiles[tile];
-                mapTile.ShowHighlight(highlight);
-                m_highlightedTiles.Add(mapTile);
-            }
+            tile.ShowHighlight(highlight);
+            m_highlightedTiles.Add(tile);
         }
     }
 

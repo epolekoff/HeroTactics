@@ -5,6 +5,11 @@ using UnityEngine;
 public abstract class Player
 {
     /// <summary>
+    /// Accessor for the units owned by this player.
+    /// </summary>
+    public List<Unit> Units { get { return m_myUnits; } }
+
+    /// <summary>
     /// Each player has a list of all of their units.
     /// </summary>
     protected List<Unit> m_myUnits = new List<Unit>();
