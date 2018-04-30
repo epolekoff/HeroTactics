@@ -13,5 +13,4 @@ public class Hero : Unit
     /// Heroes are not enemies.
     /// </summary>
     public override bool IsEnemy {  get { return false; } }
-
 }

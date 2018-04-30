@@ -34,6 +34,12 @@ public class HumanPlayer : Player, IStateMachineEntity
 
         // Check if the turn is over.
         CheckTurnHasEnded();
+
+        // TEST CODE: Prove that Undo works.
+        if(Input.GetKeyDown(KeyCode.Backspace))
+        {
+            UndoMovement();
+        }
     }
 
     /// <summary>
@@ -109,5 +115,22 @@ public class HumanPlayer : Player, IStateMachineEntity
 
         // Clear all highlights
         GameManager.Instance.Map.ClearHighlightedTiles();
+    }
+
+    /// <summary>
+    /// Move the selected unit to its previous location.
+    /// </summary>
+    public void UndoMovement()
+    {
+        if(SelectedUnit == null || !SelectedUnit.HasMovedThisTurn)
+        {
+            return;
+        }
+
+        // Move the unit back to its original tile.
+        GameManager.Instance.Map.MoveObjectToTile(SelectedUnit, SelectedUnit.PreviousTilePosition, true);
+
+        // Reset the unit so it can move again.
+        SelectedUnit.SetCanMoveAgain();
     }
 }

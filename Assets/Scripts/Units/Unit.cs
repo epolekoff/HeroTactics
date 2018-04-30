@@ -20,7 +20,12 @@ public abstract class Unit : MonoBehaviour
     /// <summary>
     /// The position of this unit on the map.
     /// </summary>
-    public Vector3 TilePosition;
+    public Vector3 TilePosition = new Vector3(int.MinValue, int.MinValue, int.MinValue);
+
+    /// <summary>
+    /// The previous position of this unit, so the player can undo their move.
+    /// </summary>
+    public Vector3 PreviousTilePosition;
 
     /// <summary>
     /// Is this unit an enemy?
@@ -67,6 +72,15 @@ public abstract class Unit : MonoBehaviour
     /// Perform any actions on this unit that should happen when a new turn starts.
     /// </summary>
     public void OnTurnEnd()
+    {
+        // When the turn ends, reset the movement variables.
+        SetCanMoveAgain();
+    }
+
+    /// <summary>
+    /// After undoing movement or advancing the turn, reset the movement variables so this character can move again.
+    /// </summary>
+    public void SetCanMoveAgain()
     {
         HasMovedThisTurn = false;
 

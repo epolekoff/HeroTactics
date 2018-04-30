@@ -37,7 +37,7 @@ public class GameMap : MonoBehaviour {
     /// <summary>
     /// Move an object to a new tile. Record where it is now.
     /// </summary>
-    public void MoveObjectToTile(Unit unit, Vector3 tilePosition, bool firstTimeSetup = false, System.Action callback = null)
+    public void MoveObjectToTile(Unit unit, Vector3 tilePosition, bool forceImmediate = false, System.Action callback = null)
     {
         // Error checking
         if(!MapTiles.ContainsKey(tilePosition))
@@ -47,7 +47,7 @@ public class GameMap : MonoBehaviour {
         }
 
         // Move the game object
-        if (firstTimeSetup)
+        if (forceImmediate)
         {
             unit.transform.position = GetWorldSpacePositionOfMapTilePosition(tilePosition); 
         }
@@ -63,13 +63,14 @@ public class GameMap : MonoBehaviour {
 
         // Get the shooter's old position
         Vector3 oldPosition = unit.TilePosition;
+        unit.PreviousTilePosition = oldPosition;
 
         // Move the object to the new position.
         ObjectsOnTiles[(int)tilePosition.x, (int)tilePosition.y, (int)tilePosition.z] = unit.gameObject;
         unit.TilePosition = tilePosition;
 
         // Delete the object from the old position
-        if (!firstTimeSetup)
+        if (IsTilePositionInBounds(oldPosition))
         {
             ObjectsOnTiles[(int)oldPosition.x, (int)oldPosition.y, (int)oldPosition.z] = null;
         }
@@ -181,14 +182,27 @@ public class GameMap : MonoBehaviour {
     }
 
     /// <summary>
+    /// Check if the tile position is within bounds
+    /// </summary>
+    public bool IsTilePositionInBounds(Vector3 tilePosition)
+    {
+        if (tilePosition.x < 0 || tilePosition.x >= Width ||
+            tilePosition.y < 0 || tilePosition.y >= Depth ||
+            tilePosition.z < 0 || tilePosition.z >= MaxMapHeight)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Is it valid to move to this tile.
     /// </summary>
     public bool IsValidTilePosition(Vector3 tilePosition)
     {
         // Check against the map bounds.
-        if (tilePosition.x < 0 || tilePosition.x >= Width ||
-            tilePosition.y < 0 || tilePosition.y >= Depth ||
-            tilePosition.z < 0 || tilePosition.z >= MaxMapHeight)
+        if(!IsTilePositionInBounds(tilePosition))
         {
             return false;
         }
