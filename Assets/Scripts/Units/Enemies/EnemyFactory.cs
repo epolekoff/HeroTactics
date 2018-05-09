@@ -49,6 +49,7 @@ public static class EnemyFactory
         // Set up the enemy class.
         Enemy enemy = enemyObject.GetComponent<Enemy>();
         enemy.EnemyType = type;
+        enemy.Initialize();
 
         return enemy;
     }

@@ -47,6 +47,7 @@ public static class HeroFactory
 
         // Set up the hero class.
         Hero hero = heroObject.GetComponent<Hero>();
+        hero.Initialize();
         hero.HeroType = id;
 
         return hero;

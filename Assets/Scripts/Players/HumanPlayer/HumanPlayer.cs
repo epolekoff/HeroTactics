@@ -34,12 +34,6 @@ public class HumanPlayer : Player, IStateMachineEntity
 
         // Check if the turn is over.
         CheckTurnHasEnded();
-
-        // TEST CODE: Prove that Undo works.
-        if(Input.GetKeyDown(KeyCode.Backspace))
-        {
-            UndoMovement();
-        }
     }
 
     /// <summary>
@@ -98,11 +92,13 @@ public class HumanPlayer : Player, IStateMachineEntity
     /// <summary>
     /// Select a specified unit and show its range.
     /// </summary>
-    /// <param name="unit"></param>
     public void SelectUnit(Unit unit)
     {
         SelectedUnit = unit;
         GameManager.Instance.Map.HighlightMovementRange(unit);
+
+        // Hide the Selected Unit panel
+        GameManager.Instance.GameCanvas.ShowUnitStatsPanel(true);
     }
 
     /// <summary>
@@ -115,6 +111,9 @@ public class HumanPlayer : Player, IStateMachineEntity
 
         // Clear all highlights
         GameManager.Instance.Map.ClearHighlightedTiles();
+
+        // Hide the Selected Unit panel
+        GameManager.Instance.GameCanvas.ShowUnitStatsPanel(false);
     }
 
     /// <summary>
@@ -122,7 +121,7 @@ public class HumanPlayer : Player, IStateMachineEntity
     /// </summary>
     public void UndoMovement()
     {
-        if(SelectedUnit == null || !SelectedUnit.HasMovedThisTurn)
+        if (SelectedUnit == null || !SelectedUnit.HasMovedThisTurn)
         {
             return;
         }

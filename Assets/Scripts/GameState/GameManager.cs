@@ -12,6 +12,11 @@ public class GameManager : Singleton<GameManager>, IStateMachineEntity
     public GameCamera GameCamera;
 
     /// <summary>
+    /// The Canvas UI.
+    /// </summary>
+    public GameCanvas GameCanvas;
+
+    /// <summary>
     /// A mapping of legal unit ids to their prefabs.
     /// </summary>
     public HeroRegistry HeroRegistry;

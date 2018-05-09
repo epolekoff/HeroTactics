@@ -18,6 +18,11 @@ public abstract class Unit : MonoBehaviour
     public UnitStats Stats;
 
     /// <summary>
+    /// Health for the unit
+    /// </summary>
+    public int CurrentHealth { get; protected set; }
+
+    /// <summary>
     /// The position of this unit on the map.
     /// </summary>
     public Vector3 TilePosition = new Vector3(int.MinValue, int.MinValue, int.MinValue);
@@ -36,6 +41,14 @@ public abstract class Unit : MonoBehaviour
     /// Check if this unit has already moved this turn.
     /// </summary>
     public bool HasMovedThisTurn { get; private set; }
+
+    /// <summary>
+    /// Set up this unit when it's created.
+    /// </summary>
+    public void Initialize()
+    {
+        CurrentHealth = Stats.MaxHealth;
+    }
 
     // Update is called once per frame
     void Update()
