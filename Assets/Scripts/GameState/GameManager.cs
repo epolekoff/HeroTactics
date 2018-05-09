@@ -79,7 +79,6 @@ public class GameManager : Singleton<GameManager>, IStateMachineEntity
     public void EndCurrentPlayersTurn()
     {
         // Figure out who the new current player is.
-        Player lastTurnPlayer = CurrentPlayer;
         if(m_currentPlayerIsHuman)
         {
             CurrentPlayer = EnemyPlayer;

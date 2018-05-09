@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 2c633f5090d0aba4eb2f630469f9075f
+timeCreated: 1525842376
+licenseType: Pro
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Valken
+  fontNames:
+  - Valken
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

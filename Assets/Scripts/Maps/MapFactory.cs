@@ -79,7 +79,7 @@ public static class MapFactory {
         // Create the tiles.
         foreach (var kvp in mapData.TileHeights)
         {
-            List<MapTile> tilesAtPosition = GenerateMapTile(kvp.Key, kvp.Value, gameMap);
+            GenerateMapTile(kvp.Key, kvp.Value, gameMap);
         }
 
         return gameMap;
