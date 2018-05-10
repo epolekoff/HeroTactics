@@ -54,7 +54,7 @@ public class SelectUnitState : AbsState
         Unit unitOnTile = map.GetUnitOnTile(tile.Position);
 
         // If clicking a tile with a unit, select the unit
-        if (unitOnTile != null && unitOnTile.CanMove())
+        if (unitOnTile != null && unitOnTile.CanAttack())
         {
             m_player.SelectUnit(unitOnTile);
         }

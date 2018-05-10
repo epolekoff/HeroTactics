@@ -79,7 +79,7 @@ public class HumanPlayer : Player, IStateMachineEntity
     {
         foreach(Unit unit in m_myUnits)
         {
-            if(!unit.HasMovedThisTurn)
+            if(!unit.HasAttackedThisTurn)
             {
                 return;
             }
@@ -95,7 +95,12 @@ public class HumanPlayer : Player, IStateMachineEntity
     public void SelectUnit(Unit unit)
     {
         SelectedUnit = unit;
-        GameManager.Instance.Map.HighlightMovementRange(unit);
+
+        // Highlight the movement range, if the unit can move.
+        if(!unit.HasMovedThisTurn)
+        {
+            GameManager.Instance.Map.HighlightMovementRange(unit);
+        }
 
         // Hide the Selected Unit panel
         GameManager.Instance.GameCanvas.ShowUnitStatsPanel(true);
@@ -130,6 +135,6 @@ public class HumanPlayer : Player, IStateMachineEntity
         GameManager.Instance.Map.MoveObjectToTile(SelectedUnit, SelectedUnit.PreviousTilePosition, true);
 
         // Reset the unit so it can move again.
-        SelectedUnit.SetCanMoveAgain();
+        SelectedUnit.SetCanMoveAndActAgain();
     }
 }

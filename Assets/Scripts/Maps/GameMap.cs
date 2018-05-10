@@ -56,7 +56,7 @@ public class GameMap : MonoBehaviour {
             // Get the path of travel
             MapTile start = MapTiles[unit.TilePosition];
             MapTile goal = MapTiles[tilePosition];
-            List<MapTile> path = Pathfinder.GetPath(start, goal);
+            List<MapTile> path = Pathfinder.GetPath(GameManager.Instance.Map, start, goal);
 
             StartCoroutine(LerpObjectAlongPath(unit.transform, path, callback));
         }

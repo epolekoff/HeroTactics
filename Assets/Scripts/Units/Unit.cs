@@ -38,9 +38,10 @@ public abstract class Unit : MonoBehaviour
     public virtual bool IsEnemy { get; set; }
 
     /// <summary>
-    /// Check if this unit has already moved this turn.
+    /// Check if this unit has already acted this turn.
     /// </summary>
     public bool HasMovedThisTurn { get; private set; }
+    public bool HasAttackedThisTurn { get; private set; }
 
     /// <summary>
     /// Set up this unit when it's created.
@@ -58,26 +59,34 @@ public abstract class Unit : MonoBehaviour
     }
 
     /// <summary>
-    /// Check if this unit can move.
+    /// Check if this unit can attack.
     /// </summary>
-    public bool CanMove()
+    public bool CanAttack()
     {
-        return !HasMovedThisTurn;
+        return !HasAttackedThisTurn;
     }
 
     /// <summary>
-    /// Mark that this unit has moved this turn, and dim the visual so we know.
+    /// Mark that this unit has moved this turn.
     /// </summary>
     public void SetHasMovedThisTurn()
     {
         HasMovedThisTurn = true;
+    }
+
+    /// <summary>
+    /// Mark that this unit has attacked this turn, and dim the visual so we know.
+    /// </summary>
+    public void SetHasAttackedThisTurn()
+    {
+        HasAttackedThisTurn = true;
 
         // Darken the visual.
         Color c = Visual.GetComponent<SpriteRenderer>().color;
         Visual.GetComponent<SpriteRenderer>().color = new Color(
-            c.r - HasMovedDarkenAmount, 
-            c.g - HasMovedDarkenAmount, 
-            c.b - HasMovedDarkenAmount, 
+            c.r - HasMovedDarkenAmount,
+            c.g - HasMovedDarkenAmount,
+            c.b - HasMovedDarkenAmount,
             c.a);
     }
 
@@ -87,15 +96,16 @@ public abstract class Unit : MonoBehaviour
     public void OnTurnEnd()
     {
         // When the turn ends, reset the movement variables.
-        SetCanMoveAgain();
+        SetCanMoveAndActAgain();
     }
 
     /// <summary>
     /// After undoing movement or advancing the turn, reset the movement variables so this character can move again.
     /// </summary>
-    public void SetCanMoveAgain()
+    public void SetCanMoveAndActAgain()
     {
         HasMovedThisTurn = false;
+        HasAttackedThisTurn = false;
 
         // Re-lighten the visual.
         Color c = Visual.GetComponent<SpriteRenderer>().color;

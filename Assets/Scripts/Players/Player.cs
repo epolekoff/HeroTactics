@@ -49,11 +49,11 @@ public abstract class Player
         // Move the unit there.
         map.MoveObjectToTile(unit, tilePosition, false, () =>
         {
-            // Record that this unit has moved, after they finish moving.
             unit.SetHasMovedThisTurn();
+            unit.SetHasAttackedThisTurn();
 
             // Call additional callbacks
-            if(OnCompleteCallback != null)
+            if (OnCompleteCallback != null)
             {
                 OnCompleteCallback();
             }
