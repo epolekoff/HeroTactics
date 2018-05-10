@@ -43,12 +43,15 @@ public abstract class Unit : MonoBehaviour
     public bool HasMovedThisTurn { get; private set; }
     public bool HasAttackedThisTurn { get; private set; }
 
+    public List<UnitAction> AvailableActions { get; private set; }
+
     /// <summary>
     /// Set up this unit when it's created.
     /// </summary>
     public void Initialize()
     {
         CurrentHealth = Stats.MaxHealth;
+        AvailableActions = Stats.AvailableActions;
     }
 
     // Update is called once per frame
