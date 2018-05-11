@@ -20,4 +20,13 @@ public abstract class UnitAction : MonoBehaviour {
 
     [SerializeField()]
     public UnitActionRange Range;
+
+
+    /// <summary>
+    /// Execute this action.
+    /// </summary>
+    public void Execute(Unit actingUnit)
+    {
+
+    }
 }

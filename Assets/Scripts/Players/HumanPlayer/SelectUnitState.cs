@@ -80,6 +80,6 @@ public class SelectUnitState : AbsState
     private void OnUnitFinishedMoving()
     {
         // When a unit finishes moving, allow the player to select the next unit again.
-        m_player.GetStateMachine().ChangeState(new SelectAttackState());
+        m_player.GetStateMachine().ChangeState(new SelectUnitState());
     }
 }
