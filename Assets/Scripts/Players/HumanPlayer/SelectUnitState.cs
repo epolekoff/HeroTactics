@@ -62,7 +62,7 @@ public class SelectUnitState : AbsState
         else if (tile.HighlightState == HighlightState.Friendly && m_player.SelectedUnit != null)
         {
             // Move the selected unit to the tile.
-            m_player.MoveUnitToTile(m_player.SelectedUnit, tile.Position, OnUnitFinishedMoving);
+            m_player.MoveUnitToTile(m_player.SelectedUnit, tile.Position, null);
 
             // Watch the unit move.
             m_player.GetStateMachine().ChangeState(new WatchUnitMoveState());
@@ -72,17 +72,5 @@ public class SelectUnitState : AbsState
         {
             m_player.DeselectUnit();
         }
-    }
-
-    /// <summary>
-    /// Callback for when the unit finishes moving.
-    /// </summary>
-    private void OnUnitFinishedMoving()
-    {
-        // When a unit finishes moving, allow the player to select the next unit again.
-        // TODO: The WatchUnitMoveState is a dead state. If something enters it, it cannot leave without this callback.
-        // Instead, we should mark the unit as IsMoving, and have the WatchUnitMoveState poll on that boolean.
-        // That way, its impossible to become stuck, and gives more control (like a 2 second delay after moving before snapping the camera).
-        //m_player.GetStateMachine().ChangeState(new SelectUnitState());
     }
 }
