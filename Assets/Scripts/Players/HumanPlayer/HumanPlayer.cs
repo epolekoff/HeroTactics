@@ -7,6 +7,7 @@ public class HumanPlayer : Player, IStateMachineEntity
 {
     
     public Unit SelectedUnit;
+    public UnitAction SelectedAction;
 
     // Delegates
     public delegate void OnTileClickedDelegate(MapTile tile);

@@ -21,12 +21,24 @@ public abstract class UnitAction : MonoBehaviour {
     [SerializeField()]
     public UnitActionRange Range;
 
+    protected Unit m_owner;
 
     /// <summary>
-    /// Execute this action.
+    /// Initialize this action when instantiated.
     /// </summary>
-    public void Execute(Unit actingUnit)
+    public void Initialize(Unit owner)
     {
-
+        m_owner = owner;
     }
+
+    /// <summary>
+    /// Called each frame during the Aim state. This should allow each action to handle aiming itself.
+    /// Returns true when the aiming is valid and the player can fire.
+    /// </summary>
+    public abstract bool Aim();
+
+    /// <summary>
+    /// Execute this action, using the values gathered while aiming.
+    /// </summary>
+    public abstract void Execute();
 }

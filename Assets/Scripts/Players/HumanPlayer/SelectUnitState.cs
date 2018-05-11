@@ -80,6 +80,9 @@ public class SelectUnitState : AbsState
     private void OnUnitFinishedMoving()
     {
         // When a unit finishes moving, allow the player to select the next unit again.
-        m_player.GetStateMachine().ChangeState(new SelectUnitState());
+        // TODO: The WatchUnitMoveState is a dead state. If something enters it, it cannot leave without this callback.
+        // Instead, we should mark the unit as IsMoving, and have the WatchUnitMoveState poll on that boolean.
+        // That way, its impossible to become stuck, and gives more control (like a 2 second delay after moving before snapping the camera).
+        //m_player.GetStateMachine().ChangeState(new SelectUnitState());
     }
 }

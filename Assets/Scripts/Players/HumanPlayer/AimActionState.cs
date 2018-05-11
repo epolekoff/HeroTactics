@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WatchUnitMoveState : AbsState
-{
+public class AimActionState : AbsState {
+
     /// <summary>
     /// Enter
     /// </summary>
@@ -11,6 +11,7 @@ public class WatchUnitMoveState : AbsState
     public override void Enter(IStateMachineEntity entity)
     {
         base.Enter(entity);
+
     }
 
     /// <summary>
@@ -19,11 +20,21 @@ public class WatchUnitMoveState : AbsState
     /// <param name="entity"></param>
     public override void Update(IStateMachineEntity entity)
     {
-        // Go back to the SelectUnitState when the selected unit stops moving.
         HumanPlayer player = (HumanPlayer)entity;
-        if(player.SelectedUnit == null || !player.SelectedUnit.IsMoving)
+
+        // If no action is selected, return until an action is selected.
+        if(player.SelectedAction == null)
         {
             entity.GetStateMachine().ChangeState(new SelectUnitState());
+        }
+
+        // Handle aiming for the selected action.
+        bool hasValidTarget = player.SelectedAction.Aim();
+
+        if(Input.GetMouseButtonDown(0) && hasValidTarget)
+        {
+            player.SelectedAction.Execute();
+            entity.GetStateMachine().ChangeState(new WatchActionState());
         }
     }
 
@@ -33,6 +44,7 @@ public class WatchUnitMoveState : AbsState
     /// <param name="entity"></param>
     public override void Exit(IStateMachineEntity entity)
     {
-        base.Enter(entity);
+        base.Exit(entity);
+
     }
 }

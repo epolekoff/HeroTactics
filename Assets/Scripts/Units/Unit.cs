@@ -37,6 +37,8 @@ public abstract class Unit : MonoBehaviour
     /// </summary>
     public virtual bool IsEnemy { get; set; }
 
+    public bool IsMoving { get; set; }
+
     /// <summary>
     /// Check if this unit has already acted this turn.
     /// </summary>

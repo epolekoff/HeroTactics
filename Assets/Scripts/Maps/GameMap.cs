@@ -50,6 +50,10 @@ public class GameMap : MonoBehaviour {
         if (forceImmediate)
         {
             unit.transform.position = GetWorldSpacePositionOfMapTilePosition(tilePosition); 
+            if(callback != null)
+            {
+                callback();
+            }
         }
         else
         {
@@ -58,7 +62,7 @@ public class GameMap : MonoBehaviour {
             MapTile goal = MapTiles[tilePosition];
             List<MapTile> path = Pathfinder.GetPath(GameManager.Instance.Map, start, goal);
 
-            StartCoroutine(LerpObjectAlongPath(unit.transform, path, callback));
+            StartCoroutine(LerpObjectAlongPath(unit, path, callback));
         }
 
         // Get the shooter's old position
@@ -303,8 +307,12 @@ public class GameMap : MonoBehaviour {
     /// Smoothely move unit to the correct tile through a path.
     /// </summary>
     /// <returns></returns>
-    private IEnumerator LerpObjectAlongPath(Transform transform, List<MapTile> path, System.Action callback)
+    private IEnumerator LerpObjectAlongPath(Unit unit, List<MapTile> path, System.Action callback)
     {
+        Transform transform = unit.transform;
+
+        unit.IsMoving = true;
+
         for(int i = 0; i < path.Count; i++)
         {
             float timer = 0;
@@ -320,6 +328,7 @@ public class GameMap : MonoBehaviour {
                 yield return new WaitForEndOfFrame();
             }
         }
+        unit.IsMoving = false;
         if (callback != null)
         {
             callback();
