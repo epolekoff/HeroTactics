@@ -113,7 +113,7 @@ public class HumanPlayer : Player, IStateMachineEntity
     /// </summary>
     public void SelectAction(int index)
     {
-        if(SelectedUnit == null || SelectedUnit.IsEnemy)
+        if(SelectedUnit == null || SelectedUnit.IsEnemyOf(this))
         {
             return;
         }

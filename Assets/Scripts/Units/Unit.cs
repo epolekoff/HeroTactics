@@ -40,11 +40,6 @@ public abstract class Unit : MonoBehaviour
     /// </summary>
     public Vector3 PreviousTilePosition;
 
-    /// <summary>
-    /// Is this unit an enemy?
-    /// </summary>
-    public virtual bool IsEnemy { get; set; }
-
     public bool IsMoving { get; set; }
 
     /// <summary>
@@ -154,6 +149,15 @@ public abstract class Unit : MonoBehaviour
             c.g + HasMovedDarkenAmount,
             c.b + HasMovedDarkenAmount,
             c.a);
+    }
+
+    /// <summary>
+    /// Check if this unit considers a specified player an enemy.
+    /// This could allow multiple player types, and allies, in the future.
+    /// </summary>
+    public bool IsEnemyOf(Player otherPlayer)
+    {
+        return Owner != otherPlayer;
     }
 
     /// <summary>

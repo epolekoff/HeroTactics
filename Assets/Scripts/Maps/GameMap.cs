@@ -30,6 +30,11 @@ public struct MapTileFilterInfo
     /// </summary>
     public bool NoStoppingOnAllies;
     public bool NoStoppingOnEnemies;
+
+    /// <summary>
+    /// The player doing the filtering. This allows the algorithm to know who is an Ally or an Enemy.
+    /// </summary>
+    public Player Player;
 }
 
 public class GameMap : MonoBehaviour {
@@ -85,7 +90,7 @@ public class GameMap : MonoBehaviour {
             // Get the path of travel
             MapTile start = MapTiles[unit.TilePosition];
             MapTile goal = MapTiles[tilePosition];
-            MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo() { AlliesOk = true, NoStoppingOnAllies = true, NoStoppingOnEnemies = true };
+            MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo() { AlliesOk = true, NoStoppingOnAllies = true, NoStoppingOnEnemies = true, Player = unit.Owner };
             List<MapTile> path = Pathfinder.GetPath(GameManager.Instance.Map, start, goal, tileFilterInfo);
 
             StartCoroutine(LerpObjectAlongPath(unit, path, callback));
@@ -148,13 +153,14 @@ public class GameMap : MonoBehaviour {
     {
         ClearHighlightedTiles();
 
-        HighlightState highlight = unit.IsEnemy ? HighlightState.Enemy : HighlightState.Friendly;
+        HighlightState highlight = unit.Owner is EnemyPlayer ? HighlightState.Enemy : HighlightState.Friendly;
 
         MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo()
         {
             AlliesOk = true,
             NoStoppingOnAllies = true,
-            NoStoppingOnEnemies = true
+            NoStoppingOnEnemies = true,
+            Player = unit.Owner,
         };
 
         List<MapTile> allTilesInRange = GetAllTilesInRange(unit.TilePosition, unit.Stats.MovementRange, tileFilterInfo);
@@ -323,8 +329,8 @@ public class GameMap : MonoBehaviour {
         // Sometimes, we want to move through allies or only attack enemies.
         Unit unitOnTile = GetUnitOnTile(tilePosition);
         if (unitOnTile != null && 
-            ((unitOnTile.IsEnemy && (tileFilterInfo.AlliesRequired || !tileFilterInfo.EnemiesOk)) ||
-            (!unitOnTile.IsEnemy && (tileFilterInfo.EnemiesRequired || !tileFilterInfo.AlliesOk))))
+            ((!unitOnTile.IsEnemyOf(tileFilterInfo.Player) && (tileFilterInfo.AlliesRequired || !tileFilterInfo.EnemiesOk)) ||
+            (unitOnTile.IsEnemyOf(tileFilterInfo.Player) && (tileFilterInfo.EnemiesRequired || !tileFilterInfo.AlliesOk))))
         {
             return false;
         }
@@ -351,8 +357,8 @@ public class GameMap : MonoBehaviour {
             // If the filtering info says we can't stand on the same tile as another unit, then remove those tiles.
             Unit unitOnTile = GetUnitOnTile(potentialTile.Position);
             if (unitOnTile != null && 
-                ((tileFilterInfo.NoStoppingOnAllies && !unitOnTile.IsEnemy) || 
-                (tileFilterInfo.NoStoppingOnEnemies && unitOnTile.IsEnemy)))
+                ((tileFilterInfo.NoStoppingOnAllies && !unitOnTile.IsEnemyOf(tileFilterInfo.Player)) || 
+                (tileFilterInfo.NoStoppingOnEnemies && unitOnTile.IsEnemyOf(tileFilterInfo.Player))))
             {
                 continue;
             }

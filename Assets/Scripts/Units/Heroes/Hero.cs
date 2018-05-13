@@ -8,9 +8,4 @@ public class Hero : Unit
     /// The hero that this object represents.
     /// </summary>
     public HeroType HeroType;
-
-    /// <summary>
-    /// Heroes are not enemies.
-    /// </summary>
-    public override bool IsEnemy {  get { return false; } }
 }

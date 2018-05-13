@@ -51,7 +51,7 @@ public class EnemyPlayer : Player
                 GameMap map = GameManager.Instance.Map;
                 int randomTargetIndex = UnityEngine.Random.Range(0, GameManager.Instance.HumanPlayer.Units.Count);
 
-                MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo() { NoStoppingOnEnemies = true, NoStoppingOnAllies = true };
+                MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo() { NoStoppingOnEnemies = true, NoStoppingOnAllies = true, Player = this };
 
                 List<MapTile> neighborsOfTargetUnit = map.GetValidNeighbors(GameManager.Instance.HumanPlayer.Units[randomTargetIndex].TilePosition, tileFilterInfo);
                 if (neighborsOfTargetUnit.Count != 0)

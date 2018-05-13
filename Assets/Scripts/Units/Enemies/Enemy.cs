@@ -8,9 +8,4 @@ public class Enemy : Unit
     /// The enemy that this object represents.
     /// </summary>
     public EnemyType EnemyType;
-
-    /// <summary>
-    /// Enemies are enemies.
-    /// </summary>
-    public override bool IsEnemy { get { return true; } }
 }
