@@ -9,9 +9,6 @@ public class HumanPlayer : Player, IStateMachineEntity
     public Unit SelectedUnit;
     public UnitAction SelectedAction;
 
-    // Delegates
-    public delegate void OnTileClickedDelegate(MapTile tile);
-
     // Private
     private FiniteStateMachine m_stateMachine;
     public FiniteStateMachine GetStateMachine(int number = 0) { return m_stateMachine; }
@@ -35,34 +32,6 @@ public class HumanPlayer : Player, IStateMachineEntity
 
         // Check if the turn is over.
         CheckTurnHasEnded();
-    }
-
-    /// <summary>
-    /// Check if a tile was clicked this frame and execute a function if it was.
-    /// </summary>
-    public void CheckClickOnTile(OnTileClickedDelegate callback)
-    {
-        // Click to select units/move
-        if (Input.GetMouseButtonDown(0))
-        {
-            // Click on a tile.
-            RaycastHit hit;
-            Ray ray = GameManager.Instance.GameCamera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(
-                ray,
-                out hit,
-                10000f,
-                LayerMask.GetMask("MapTile")))
-            {
-                // Handle clicking on the tile.
-                var mapTile = hit.transform.parent.GetComponent<MapTile>();
-                if(mapTile != null)
-                {
-                    callback(mapTile);
-                }
-                
-            }
-        }
     }
 
     /// <summary>
@@ -155,8 +124,10 @@ public class HumanPlayer : Player, IStateMachineEntity
             return;
         }
 
-        // Select an action.
+        // Select an action, and deselect the old action.
+        if(SelectedAction != null) { SelectedAction.OnActionDeselected(SelectedUnit); }
         SelectedAction = SelectedUnit.AvailableActions[index];
+        SelectedAction.OnActionSelected(SelectedUnit);
 
         // Now that an action is selected, allow the player to aim it.
         GetStateMachine().ChangeState(new AimActionState());

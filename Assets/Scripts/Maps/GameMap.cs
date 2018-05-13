@@ -2,6 +2,35 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using System.Linq;
+
+/// <summary>
+/// Determines what tiles should be filtered out of a search.
+/// This allows movement through allies, attacks only on enemies, etc.
+/// </summary>
+public struct MapTileFilterInfo
+{
+    /// <summary>
+    /// Allow tiles with these units to appear in the filter.
+    /// Useful to allow units to pass through allies.
+    /// </summary>
+    public bool AlliesOk;
+    public bool EnemiesOk;
+
+    /// <summary>
+    /// Require units of these types to appear on the tile.
+    /// Useful for casting healing, or attacking enemies.
+    /// </summary>
+    public bool AlliesRequired;
+    public bool EnemiesRequired;
+
+    /// <summary>
+    /// Disallow a tile with any unit on it from appearing.
+    /// This is the last step, so you can pass through allies, but not stop on them.
+    /// </summary>
+    public bool NoStoppingOnUnit;
+}
+
 public class GameMap : MonoBehaviour {
 
     private const float ValidNeighborHeightDifference = 1;
@@ -29,11 +58,6 @@ public class GameMap : MonoBehaviour {
         ObjectsOnTiles = new GameObject[width, MaxMapHeight, depth];
     }
 
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
     /// <summary>
     /// Move an object to a new tile. Record where it is now.
     /// </summary>
@@ -60,7 +84,8 @@ public class GameMap : MonoBehaviour {
             // Get the path of travel
             MapTile start = MapTiles[unit.TilePosition];
             MapTile goal = MapTiles[tilePosition];
-            List<MapTile> path = Pathfinder.GetPath(GameManager.Instance.Map, start, goal);
+            MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo() { AlliesOk = true, NoStoppingOnUnit = true };
+            List<MapTile> path = Pathfinder.GetPath(GameManager.Instance.Map, start, goal, tileFilterInfo);
 
             StartCoroutine(LerpObjectAlongPath(unit, path, callback));
         }
@@ -116,9 +141,84 @@ public class GameMap : MonoBehaviour {
     }
 
     /// <summary>
+    /// Highlight the tiles that indicate this player's movement range.
+    /// </summary>
+    public void HighlightMovementRange(Unit unit)
+    {
+        ClearHighlightedTiles();
+
+        HighlightState highlight = unit.IsEnemy ? HighlightState.Enemy : HighlightState.Friendly;
+
+        MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo()
+        {
+            AlliesOk = true,
+            NoStoppingOnUnit = true
+        };
+
+        List<MapTile> allTilesInRange = GetAllTilesInRange(unit.TilePosition, unit.Stats.MovementRange, tileFilterInfo);
+        foreach (MapTile tile in allTilesInRange)
+        {
+            tile.ShowHighlight(highlight);
+            m_highlightedTiles.Add(tile);
+        }
+    }
+
+    /// <summary>
+    /// Get all tiles in range of a tile and highlight them as actionable.
+    /// </summary>
+    public void HighlightActionRange(Vector3 startTile, UnitActionRange range, MapTileFilterInfo tileFilterInfo)
+    {
+        List<MapTile> mapTilesInRange = GetAllMapTilesInActionRange(startTile, range, tileFilterInfo);
+        foreach(var mapTile in mapTilesInRange)
+        {
+            m_highlightedTiles.Add(mapTile);
+            mapTile.ShowHighlight(HighlightState.Attack);
+        }
+    }
+
+    /// <summary>
+    /// Given an action range, return a list of tiles that fall in that range of the original tile.
+    /// </summary>
+    /// <returns></returns>
+    public List<MapTile> GetAllMapTilesInActionRange(Vector3 startTile, UnitActionRange range, MapTileFilterInfo tileFilterInfo)
+    {
+        List<MapTile> mapTilesInActionRange = new List<MapTile>();
+
+        switch(range)
+        {
+            case UnitActionRange.Adjacent:
+                mapTilesInActionRange = GetAllTilesInRange(startTile, 1, tileFilterInfo);
+                break;
+            case UnitActionRange.Self:
+                mapTilesInActionRange.Add(MapTiles[startTile]);
+                break;
+            case UnitActionRange.SkipOneTile:
+                List<MapTile> adjacentMapTiles = GetAllTilesInRange(startTile, 1, tileFilterInfo);
+                List<MapTile> rangeOfTwo = GetAllTilesInRange(startTile, 2, tileFilterInfo);
+                mapTilesInActionRange = rangeOfTwo.Except(adjacentMapTiles).ToList();
+                break;
+        }
+
+        return mapTilesInActionRange;
+    }
+
+    /// <summary>
+    /// Hide the highlight on all tiles that have highlights.
+    /// </summary>
+    public void ClearHighlightedTiles()
+    {
+        foreach (var mapTile in m_highlightedTiles)
+        {
+            mapTile.ShowHighlight(HighlightState.None);
+        }
+
+        m_highlightedTiles.Clear();
+    }
+
+    /// <summary>
     /// Get the neighbors of this tile.
     /// </summary>
-    public List<MapTile> GetValidNeighbors(Vector3 tilePosition)
+    public List<MapTile> GetValidNeighbors(Vector3 tilePosition, MapTileFilterInfo tileFilterInfo)
     {
         int x = (int)tilePosition.x;
         int y = (int)tilePosition.y;
@@ -155,31 +255,31 @@ public class GameMap : MonoBehaviour {
         Vector3 down_back = back - new Vector3(0, 1, 0);
 
 
-        if (IsValidTilePosition(left) && Mathf.Abs(left.z - tilePosition.z) <= ValidNeighborHeightDifference)
+        if (IsValidTilePosition(left, tileFilterInfo) && Mathf.Abs(left.z - tilePosition.z) <= ValidNeighborHeightDifference)
             neighbors.Add(MapTiles[left]);
-        if (IsValidTilePosition(right) && Mathf.Abs(right.z - tilePosition.z) <= ValidNeighborHeightDifference)
+        if (IsValidTilePosition(right, tileFilterInfo) && Mathf.Abs(right.z - tilePosition.z) <= ValidNeighborHeightDifference)
             neighbors.Add(MapTiles[right]);
-        if (IsValidTilePosition(front) && Mathf.Abs(front.z - tilePosition.z) <= ValidNeighborHeightDifference)
+        if (IsValidTilePosition(front, tileFilterInfo) && Mathf.Abs(front.z - tilePosition.z) <= ValidNeighborHeightDifference)
             neighbors.Add(MapTiles[front]);
-        if (IsValidTilePosition(back) && Mathf.Abs(back.z - tilePosition.z) <= ValidNeighborHeightDifference)
+        if (IsValidTilePosition(back, tileFilterInfo) && Mathf.Abs(back.z - tilePosition.z) <= ValidNeighborHeightDifference)
             neighbors.Add(MapTiles[back]);
 
-        if (IsValidTilePosition(up_left) && Mathf.Abs(up_left.z - tilePosition.z) <= ValidNeighborHeightDifference)
+        if (IsValidTilePosition(up_left, tileFilterInfo) && Mathf.Abs(up_left.z - tilePosition.z) <= ValidNeighborHeightDifference)
             neighbors.Add(MapTiles[up_left]);
-        if (IsValidTilePosition(up_right) && Mathf.Abs(up_right.z - tilePosition.z) <= ValidNeighborHeightDifference)
+        if (IsValidTilePosition(up_right, tileFilterInfo) && Mathf.Abs(up_right.z - tilePosition.z) <= ValidNeighborHeightDifference)
             neighbors.Add(MapTiles[up_right]);
-        if (IsValidTilePosition(up_front) && Mathf.Abs(up_front.z - tilePosition.z) <= ValidNeighborHeightDifference)
+        if (IsValidTilePosition(up_front, tileFilterInfo) && Mathf.Abs(up_front.z - tilePosition.z) <= ValidNeighborHeightDifference)
             neighbors.Add(MapTiles[up_front]);
-        if (IsValidTilePosition(up_back) && Mathf.Abs(up_back.z - tilePosition.z) <= ValidNeighborHeightDifference)
+        if (IsValidTilePosition(up_back, tileFilterInfo) && Mathf.Abs(up_back.z - tilePosition.z) <= ValidNeighborHeightDifference)
             neighbors.Add(MapTiles[up_back]);
 
-        if (IsValidTilePosition(down_left) && Mathf.Abs(down_left.z - tilePosition.z) <= ValidNeighborHeightDifference)
+        if (IsValidTilePosition(down_left, tileFilterInfo) && Mathf.Abs(down_left.z - tilePosition.z) <= ValidNeighborHeightDifference)
             neighbors.Add(MapTiles[down_left]);
-        if (IsValidTilePosition(down_right) && Mathf.Abs(down_right.z - tilePosition.z) <= ValidNeighborHeightDifference)
+        if (IsValidTilePosition(down_right, tileFilterInfo) && Mathf.Abs(down_right.z - tilePosition.z) <= ValidNeighborHeightDifference)
             neighbors.Add(MapTiles[down_right]);
-        if (IsValidTilePosition(down_front) && Mathf.Abs(down_front.z - tilePosition.z) <= ValidNeighborHeightDifference)
+        if (IsValidTilePosition(down_front, tileFilterInfo) && Mathf.Abs(down_front.z - tilePosition.z) <= ValidNeighborHeightDifference)
             neighbors.Add(MapTiles[down_front]);
-        if (IsValidTilePosition(down_back) && Mathf.Abs(down_back.z - tilePosition.z) <= ValidNeighborHeightDifference)
+        if (IsValidTilePosition(down_back, tileFilterInfo) && Mathf.Abs(down_back.z - tilePosition.z) <= ValidNeighborHeightDifference)
             neighbors.Add(MapTiles[down_back]);
 
         return neighbors;
@@ -203,7 +303,7 @@ public class GameMap : MonoBehaviour {
     /// <summary>
     /// Is it valid to move to this tile.
     /// </summary>
-    public bool IsValidTilePosition(Vector3 tilePosition)
+    public bool IsValidTilePosition(Vector3 tilePosition, MapTileFilterInfo tileFilterInfo)
     {
         // Check against the map bounds.
         if(!IsTilePositionInBounds(tilePosition))
@@ -218,7 +318,11 @@ public class GameMap : MonoBehaviour {
         }
 
         // Check other unit objects on the tile.
-        if (GetUnitOnTile(tilePosition))
+        // Sometimes, we want to move through allies or only attack enemies.
+        Unit unitOnTile = GetUnitOnTile(tilePosition);
+        if (unitOnTile != null && 
+            ((unitOnTile.IsEnemy && (tileFilterInfo.AlliesRequired || !tileFilterInfo.EnemiesOk)) ||
+            (!unitOnTile.IsEnemy && (tileFilterInfo.EnemiesRequired || !tileFilterInfo.AlliesOk))))
         {
             return false;
         }
@@ -235,25 +339,36 @@ public class GameMap : MonoBehaviour {
     /// <summary>
     /// Recurse through all neighbors and get a list of tiles in range, without duplicates.
     /// </summary>
-    public List<MapTile> GetAllTilesInRange(Vector3 tile, int range)
+    public List<MapTile> GetAllTilesInRange(Vector3 tile, int range, MapTileFilterInfo tileFilterInfo)
     {
         // Get all tiles, filter out duplicates.
         HashSet<MapTile> tilesInRangeNoDuplicates = new HashSet<MapTile>();
-        List<MapTile> allTilesInRange = GetAllTilesInRangeRecursive(tile, 0, range);
+        List<MapTile> allTilesInRange = GetAllTilesInRangeRecursive(tile, tileFilterInfo, 0, range);
         foreach (var potentialTile in allTilesInRange)
         {
+            // If the filtering info says we can't stand on the same tile as another unit, then remove those tiles.
+            if(tileFilterInfo.NoStoppingOnUnit && GetUnitOnTile(potentialTile.Position))
+            {
+                continue;
+            }
+
+            // Remove duplicate tiles
             tilesInRangeNoDuplicates.Add(potentialTile);
         }
-
+        
         return new List<MapTile>(tilesInRangeNoDuplicates);
     }
 
-    private List<MapTile> GetAllTilesInRangeRecursive(Vector3 tilePosition, int depth, int maxDepth)
+    /// <summary>
+    /// Recursive function to get all tiles in a specified range.
+    /// </summary>
+    /// <returns></returns>
+    private List<MapTile> GetAllTilesInRangeRecursive(Vector3 tilePosition, MapTileFilterInfo tileFilterInfo, int depth, int maxDepth)
     {
         if (depth == maxDepth)
         {
             List<MapTile> list = new List<MapTile>();
-            if (IsValidTilePosition(tilePosition))
+            if (IsValidTilePosition(tilePosition, tileFilterInfo))
             {
                 list.Add(MapTiles[tilePosition]);
             }
@@ -262,45 +377,15 @@ public class GameMap : MonoBehaviour {
 
         // Keep recursing.
         List<MapTile> totalList = new List<MapTile>();
-        if (IsValidTilePosition(tilePosition))
+        if (IsValidTilePosition(tilePosition, tileFilterInfo))
         {
             totalList.Add(MapTiles[tilePosition]);
         }
-        foreach (var neighbor in GetValidNeighbors(tilePosition))
+        foreach (var neighbor in GetValidNeighbors(tilePosition, tileFilterInfo))
         {
-            totalList.AddRange(GetAllTilesInRangeRecursive(neighbor.Position, depth + 1, maxDepth));
+            totalList.AddRange(GetAllTilesInRangeRecursive(neighbor.Position, tileFilterInfo, depth + 1, maxDepth));
         }
         return totalList;
-    }
-
-    /// <summary>
-    /// Highlight the tiles that indicate this player's movement range.
-    /// </summary>
-    public void HighlightMovementRange(Unit unit)
-    {
-        ClearHighlightedTiles();
-
-        HighlightState highlight = unit.IsEnemy ? HighlightState.Enemy : HighlightState.Friendly;
-
-        List<MapTile> allTilesInRange = GetAllTilesInRange(unit.TilePosition, unit.Stats.MovementRange);
-        foreach (MapTile tile in allTilesInRange)
-        {
-            tile.ShowHighlight(highlight);
-            m_highlightedTiles.Add(tile);
-        }
-    }
-
-    /// <summary>
-    /// Hide the highlight on all tiles that have highlights.
-    /// </summary>
-    public void ClearHighlightedTiles()
-    {
-        foreach (var mapTile in m_highlightedTiles)
-        {
-            mapTile.ShowHighlight(HighlightState.None);
-        }
-
-        m_highlightedTiles.Clear();
     }
 
     /// <summary>

@@ -13,7 +13,7 @@ public static class Pathfinder
     /// Get a path between two nodes.
     /// </summary>
     /// <returns></returns>
-    public static List<MapTile> GetPath(GameMap map, MapTile start, MapTile goal)
+    public static List<MapTile> GetPath(GameMap map, MapTile start, MapTile goal, MapTileFilterInfo tileFilterInfo)
     {
         // The set of nodes already evaluated
         List<MapTile> closedSet = new List<MapTile>();
@@ -56,7 +56,7 @@ public static class Pathfinder
             //openSet.Remove(current);
             closedSet.Add(current);
 
-            List<MapTile> neighborsOfCurrent = map.GetValidNeighbors(current.Position);
+            List<MapTile> neighborsOfCurrent = map.GetValidNeighbors(current.Position, tileFilterInfo);
             foreach (var neighbor in neighborsOfCurrent)
             {
                 // Ignore the neighbor which is already evaluated.

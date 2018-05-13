@@ -10,7 +10,10 @@ public enum UnitActionRange
     SkipOneTile,
 }
 
-public abstract class UnitAction : MonoBehaviour {
+public abstract class UnitAction : MonoBehaviour
+{
+    // Delegates
+    public delegate void OnExecuteComplete();
 
     [SerializeField()]
     public string Name;
@@ -32,6 +35,17 @@ public abstract class UnitAction : MonoBehaviour {
     }
 
     /// <summary>
+    /// Called when this action is selected.
+    /// Allows each action to set up UI for its aiming.
+    /// </summary>
+    public abstract void OnActionSelected(Unit selectedUnit);
+
+    /// <summary>
+    /// Called when this action is deselected, cancelled, or completed properly.
+    /// </summary>
+    public abstract void OnActionDeselected(Unit selectedUnit);
+
+    /// <summary>
     /// Called each frame during the Aim state. This should allow each action to handle aiming itself.
     /// Returns true when the aiming is valid and the player can fire.
     /// </summary>
@@ -40,5 +54,5 @@ public abstract class UnitAction : MonoBehaviour {
     /// <summary>
     /// Execute this action, using the values gathered while aiming.
     /// </summary>
-    public abstract void Execute();
+    public abstract void Execute(OnExecuteComplete callback);
 }

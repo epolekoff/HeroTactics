@@ -96,6 +96,19 @@ public abstract class Unit : MonoBehaviour
     }
 
     /// <summary>
+    /// Take damage and check if I died.
+    /// </summary>
+    /// <param name="amount"></param>
+    public void TakeDamage(int amount)
+    {
+        CurrentHealth -= amount;
+        if(CurrentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    /// <summary>
     /// Perform any actions on this unit that should happen when a new turn starts.
     /// </summary>
     public void OnTurnEnd()
@@ -131,5 +144,14 @@ public abstract class Unit : MonoBehaviour
 
         // Keep the sprites Isometric
         Visual.transform.rotation = Camera.main.transform.rotation;
+    }
+
+    /// <summary>
+    /// When a unit loses all of their health, this gets called. It should handle alerting subscribers that this unit has died.
+    /// </summary>
+    private void Die()
+    {
+        // Destroy the gameobject.
+        GameObject.Destroy(gameObject);
     }
 }

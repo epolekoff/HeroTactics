@@ -16,6 +16,9 @@ public class SelectUnitState : AbsState
 
         // Store the player for ease of access.
         m_player = ((HumanPlayer)entity);
+
+        // Register the click callback.
+        InputManager.Instance.OnTileClickedEvent += OnTileClicked;
     }
 
     /// <summary>
@@ -25,9 +28,6 @@ public class SelectUnitState : AbsState
     public override void Update(IStateMachineEntity entity)
     {
         base.Enter(entity);
-
-        // Check if the player clicked on a tile, and handle it if they did.
-        ((HumanPlayer)entity).CheckClickOnTile(OnTileClicked);
     }
 
     /// <summary>
@@ -36,7 +36,10 @@ public class SelectUnitState : AbsState
     /// <param name="entity"></param>
     public override void Exit(IStateMachineEntity entity)
     {
-        base.Enter(entity);
+        base.Exit(entity);
+
+        // Remove the callback
+        InputManager.Instance.OnTileClickedEvent -= OnTileClicked;
     }
 
 

@@ -50,7 +50,6 @@ public abstract class Player
         map.MoveObjectToTile(unit, tilePosition, false, () =>
         {
             unit.SetHasMovedThisTurn();
-            unit.SetHasAttackedThisTurn();
 
             // Call additional callbacks
             if (OnCompleteCallback != null)

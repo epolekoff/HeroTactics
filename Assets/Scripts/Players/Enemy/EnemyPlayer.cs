@@ -38,6 +38,11 @@ public class EnemyPlayer : Player
     {
         foreach(Unit unit in Units)
         {
+            if(unit == null)
+            {
+                continue;
+            }
+
             // Only move ShortRange enemies.
             Enemy enemy = (Enemy)unit;
             if(enemy.EnemyType == EnemyType.ShortRange)
@@ -45,7 +50,10 @@ public class EnemyPlayer : Player
                 // Generate a path from one of my units to one of my enemy's.
                 GameMap map = GameManager.Instance.Map;
                 int randomTargetIndex = UnityEngine.Random.Range(0, GameManager.Instance.HumanPlayer.Units.Count);
-                List<MapTile> neighborsOfTargetUnit = map.GetValidNeighbors(GameManager.Instance.HumanPlayer.Units[randomTargetIndex].TilePosition);
+
+                MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo() { NoStoppingOnUnit = true };
+
+                List<MapTile> neighborsOfTargetUnit = map.GetValidNeighbors(GameManager.Instance.HumanPlayer.Units[randomTargetIndex].TilePosition, tileFilterInfo);
                 if (neighborsOfTargetUnit.Count != 0)
                 {
                     MapTile goal = neighborsOfTargetUnit[0];

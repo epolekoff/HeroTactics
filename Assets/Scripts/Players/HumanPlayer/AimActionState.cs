@@ -33,8 +33,7 @@ public class AimActionState : AbsState {
 
         if(Input.GetMouseButtonDown(0) && hasValidTarget)
         {
-            player.SelectedAction.Execute();
-            entity.GetStateMachine().ChangeState(new WatchActionState());
+            player.SelectedAction.Execute(() => OnActionComplete(entity));
         }
     }
 
@@ -45,6 +44,17 @@ public class AimActionState : AbsState {
     public override void Exit(IStateMachineEntity entity)
     {
         base.Exit(entity);
+    }
 
+    /// <summary>
+    /// Called when the action has finished executing.
+    /// </summary>
+    private void OnActionComplete(IStateMachineEntity entity)
+    {
+        // Set that this unit has attacked
+        ((HumanPlayer)entity).SelectedUnit.SetHasAttackedThisTurn();
+
+        // Allow the player to select the next unit.
+        entity.GetStateMachine().ChangeState(new SelectUnitState());
     }
 }

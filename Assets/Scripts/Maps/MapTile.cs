@@ -6,7 +6,8 @@ public enum HighlightState
 {
     None,
     Friendly,
-    Enemy
+    Enemy,
+    Attack
 }
 
 public class MapTile : MonoBehaviour {
@@ -24,6 +25,7 @@ public class MapTile : MonoBehaviour {
     public HighlightState HighlightState { get; private set; }
     public GameObject HighlightFriendly;
     public GameObject HighlightEnemy;
+    public GameObject HighlightAttack;
 
     /// <summary>
     /// The position of this tile in the grid.
@@ -91,14 +93,22 @@ public class MapTile : MonoBehaviour {
             case HighlightState.None:
                 HighlightFriendly.SetActive(false);
                 HighlightEnemy.SetActive(false);
+                HighlightAttack.SetActive(false);
                 break;
             case HighlightState.Friendly:
                 HighlightFriendly.SetActive(true);
                 HighlightEnemy.SetActive(false);
+                HighlightAttack.SetActive(false);
                 break;
             case HighlightState.Enemy:
                 HighlightFriendly.SetActive(false);
                 HighlightEnemy.SetActive(true);
+                HighlightAttack.SetActive(false);
+                break;
+            case HighlightState.Attack:
+                HighlightFriendly.SetActive(false);
+                HighlightEnemy.SetActive(false);
+                HighlightAttack.SetActive(true);
                 break;
         }
     }
