@@ -64,7 +64,7 @@ public class GameManager : Singleton<GameManager>, IStateMachineEntity
         m_enemies = EnemyFactory.CreateAllEnemiesAtTestStartingPoints(EnemyRegistry, DemoEnemyStartingPoints, m_map);
 
         // Create the player objects.
-        HumanPlayer = new HumanPlayer((List<Unit>)m_heroes);
+        HumanPlayer = new HumanPlayer(m_heroes);
         EnemyPlayer = new EnemyPlayer(m_enemies);
         CurrentPlayer = HumanPlayer;
 
@@ -81,6 +81,9 @@ public class GameManager : Singleton<GameManager>, IStateMachineEntity
 	void Update ()
     {
         m_stateMachine.Update();
+
+        // Check all units and see if they are all dead yet.
+        CheckGameHasEnded();
     }
 
     // End the current player's turn and transition to the next player's turn.
@@ -102,5 +105,50 @@ public class GameManager : Singleton<GameManager>, IStateMachineEntity
 
         // Show the turn UI popup
         GameCanvas.TriggerPlayerTurnPopup(CurrentPlayer);
+    }
+
+    /// <summary>
+    /// Check all units to see if they are all dead.
+    /// </summary>
+    private void CheckGameHasEnded()
+    {
+        bool allPlayerUnitsDead = true;
+        bool allEnemyUnitsDead = true;
+
+        // Check player units.
+        foreach (var unit in HumanPlayer.Units)
+        {
+            if(unit.CurrentHealth != 0)
+            {
+                allPlayerUnitsDead = false;
+                break;
+            }
+        }
+        if(allPlayerUnitsDead)
+        {
+            EndGame(EnemyPlayer);
+        }
+
+        // Check enemy units
+        foreach (var unit in EnemyPlayer.Units)
+        {
+            if (unit.CurrentHealth != 0)
+            {
+                allEnemyUnitsDead = false;
+                break;
+            }
+        }
+        if (allEnemyUnitsDead)
+        {
+            EndGame(HumanPlayer);
+        }
+    }
+
+    /// <summary>
+    /// When a player wins, end the game and log who won.
+    /// </summary>
+    private void EndGame(Player winningPlayer)
+    {
+        Debug.Log(string.Format("Player {0} has won!", winningPlayer));
     }
 }

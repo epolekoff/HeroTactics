@@ -8,6 +8,9 @@ public class FiniteStateMachine {
     protected IState globalState;
 
     protected IStateMachineEntity owner;
+
+    // Don't let Update be called on a state the same frame it changes.
+    private bool m_hasJustChangedState;
 	
     /// <summary>
     /// Constructor
@@ -24,7 +27,14 @@ public class FiniteStateMachine {
     /// <summary>
     /// Update the entire state machine each cycle.
     /// </summary>
-	public void Update () {
+	public void Update ()
+    {
+        // Don't call Update the same frame a state changes.
+        if(m_hasJustChangedState)
+        {
+            m_hasJustChangedState = false;
+            return;
+        }
 
         //Update the current state each cycle.
         currentState.Update(owner);
@@ -51,6 +61,8 @@ public class FiniteStateMachine {
 
         //Enter the new state.
         currentState.Enter(owner);
+
+        m_hasJustChangedState = true;
     }
 
     /// <summary>

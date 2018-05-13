@@ -15,7 +15,9 @@ public class TileClickAttackAction : UnitAction
     {
         MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo()
         {
-            EnemiesOk = true
+            EnemiesOk = true,
+            AlliesOk = true,
+            NoStoppingOnAllies = true
         };
         GameManager.Instance.Map.HighlightActionRange(selectedUnit.TilePosition, Range, tileFilterInfo);
     }

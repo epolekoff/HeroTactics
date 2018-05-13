@@ -31,9 +31,17 @@ public class AimActionState : AbsState {
         // Handle aiming for the selected action.
         bool hasValidTarget = player.SelectedAction.Aim();
 
-        if(Input.GetMouseButtonDown(0) && hasValidTarget)
+        if(Input.GetMouseButtonDown(0))
         {
-            player.SelectedAction.Execute(() => OnActionComplete(entity));
+            if(hasValidTarget)
+            {
+                player.SelectedAction.Execute(() => OnActionComplete(entity));
+            }
+            else
+            {
+                // Clicking on an invalid tile cancels the attack.
+                entity.GetStateMachine().ChangeState(new SelectUnitState());
+            }
         }
     }
 

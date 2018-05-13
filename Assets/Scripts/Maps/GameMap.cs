@@ -28,7 +28,8 @@ public struct MapTileFilterInfo
     /// Disallow a tile with any unit on it from appearing.
     /// This is the last step, so you can pass through allies, but not stop on them.
     /// </summary>
-    public bool NoStoppingOnUnit;
+    public bool NoStoppingOnAllies;
+    public bool NoStoppingOnEnemies;
 }
 
 public class GameMap : MonoBehaviour {
@@ -84,7 +85,7 @@ public class GameMap : MonoBehaviour {
             // Get the path of travel
             MapTile start = MapTiles[unit.TilePosition];
             MapTile goal = MapTiles[tilePosition];
-            MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo() { AlliesOk = true, NoStoppingOnUnit = true };
+            MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo() { AlliesOk = true, NoStoppingOnAllies = true, NoStoppingOnEnemies = true };
             List<MapTile> path = Pathfinder.GetPath(GameManager.Instance.Map, start, goal, tileFilterInfo);
 
             StartCoroutine(LerpObjectAlongPath(unit, path, callback));
@@ -152,7 +153,8 @@ public class GameMap : MonoBehaviour {
         MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo()
         {
             AlliesOk = true,
-            NoStoppingOnUnit = true
+            NoStoppingOnAllies = true,
+            NoStoppingOnEnemies = true
         };
 
         List<MapTile> allTilesInRange = GetAllTilesInRange(unit.TilePosition, unit.Stats.MovementRange, tileFilterInfo);
@@ -347,7 +349,10 @@ public class GameMap : MonoBehaviour {
         foreach (var potentialTile in allTilesInRange)
         {
             // If the filtering info says we can't stand on the same tile as another unit, then remove those tiles.
-            if(tileFilterInfo.NoStoppingOnUnit && GetUnitOnTile(potentialTile.Position))
+            Unit unitOnTile = GetUnitOnTile(potentialTile.Position);
+            if (unitOnTile != null && 
+                ((tileFilterInfo.NoStoppingOnAllies && !unitOnTile.IsEnemy) || 
+                (tileFilterInfo.NoStoppingOnEnemies && unitOnTile.IsEnemy)))
             {
                 continue;
             }

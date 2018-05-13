@@ -14,7 +14,7 @@ public class EnemyPlayer : Player
     /// <param name="myUnits"></param>
     public EnemyPlayer(List<Unit> myUnits)
     {
-        m_myUnits = myUnits;
+        SetMyUnits(myUnits);
     }
 
     // Update is called once per frame
@@ -51,7 +51,7 @@ public class EnemyPlayer : Player
                 GameMap map = GameManager.Instance.Map;
                 int randomTargetIndex = UnityEngine.Random.Range(0, GameManager.Instance.HumanPlayer.Units.Count);
 
-                MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo() { NoStoppingOnUnit = true };
+                MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo() { NoStoppingOnEnemies = true, NoStoppingOnAllies = true };
 
                 List<MapTile> neighborsOfTargetUnit = map.GetValidNeighbors(GameManager.Instance.HumanPlayer.Units[randomTargetIndex].TilePosition, tileFilterInfo);
                 if (neighborsOfTargetUnit.Count != 0)
@@ -62,6 +62,9 @@ public class EnemyPlayer : Player
                 }
             }
         }
+
+        // Check in case no enemies are left to move.
+        CheckTurnOver();
     }
 
     /// <summary>
@@ -70,7 +73,15 @@ public class EnemyPlayer : Player
     private void OnEnemyFinishedMoving()
     {
         m_numEnemiesMoving--;
-        if(m_numEnemiesMoving == 0)
+        CheckTurnOver();
+    }
+
+    /// <summary>
+    /// Check if all enemies have finished moving and end the turn.
+    /// </summary>
+    private void CheckTurnOver()
+    {
+        if (m_numEnemiesMoving == 0)
         {
             EndTurn();
         }

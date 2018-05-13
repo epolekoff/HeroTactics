@@ -61,4 +61,16 @@ public abstract class Player
         // Clear all highlights
         GameManager.Instance.Map.ClearHighlightedTiles();
     }
+
+    /// <summary>
+    /// Register all the units as my own.
+    /// </summary>
+    protected void SetMyUnits(List<Unit> myUnits)
+    {
+        m_myUnits = myUnits;
+        foreach(var unit in myUnits)
+        {
+            unit.Owner = this;
+        }
+    }
 }

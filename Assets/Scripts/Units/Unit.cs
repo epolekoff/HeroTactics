@@ -18,6 +18,11 @@ public abstract class Unit : MonoBehaviour
     public UnitStats Stats;
 
     /// <summary>
+    /// The owner of this unit.
+    /// </summary>
+    public Player Owner { get; set; }
+
+    /// <summary>
     /// Health for the unit
     /// </summary>
     public int CurrentHealth { get; protected set; }
@@ -151,6 +156,12 @@ public abstract class Unit : MonoBehaviour
     /// </summary>
     private void Die()
     {
+        // Remove the unit from the map.
+        GameManager.Instance.Map.RemoveObjectFromTiles(this);
+
+        // Remove me from my owner's unit list
+        Owner.Units.Remove(this);
+
         // Destroy the gameobject.
         GameObject.Destroy(gameObject);
     }

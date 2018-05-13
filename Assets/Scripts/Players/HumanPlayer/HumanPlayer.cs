@@ -18,7 +18,7 @@ public class HumanPlayer : Player, IStateMachineEntity
     /// </summary>
     public HumanPlayer(List<Unit> myUnits)
     {
-        m_myUnits = myUnits;
+        SetMyUnits(myUnits);
         m_stateMachine = new FiniteStateMachine(new SelectUnitState(), this);
     }
 
