@@ -7,6 +7,9 @@ public abstract class Unit : MonoBehaviour
     // The amount to darken sprites after moving.
     private const float HasMovedDarkenAmount = 0.5f;
 
+    /// The prefab for displaying damage numbers.
+    private const string DamageNumberPrefabString = "DamageNumber";
+
     /// <summary>
     /// The sprite representing this character.
     /// </summary>
@@ -58,7 +61,14 @@ public abstract class Unit : MonoBehaviour
     public void Initialize()
     {
         CurrentHealth = Stats.MaxHealth;
-        AvailableActions = Stats.AvailableActions;
+        AvailableActions = new List<UnitAction>();
+        foreach(var actionPrefab in Stats.AvailableActions)
+        {
+            GameObject actionObject = Instantiate(actionPrefab.gameObject) as GameObject;
+            UnitAction action = actionObject.GetComponent<UnitAction>();
+            AvailableActions.Add(action);
+            action.Initialize(this);
+        }
     }
 
     // Update is called once per frame
@@ -106,6 +116,13 @@ public abstract class Unit : MonoBehaviour
     /// <param name="amount"></param>
     public void TakeDamage(int amount)
     {
+        // Display the hit
+        var damageNumberPrefab = Resources.Load(DamageNumberPrefabString) as GameObject;
+        var damageNumberGameObject = GameObject.Instantiate(damageNumberPrefab, transform.position, Quaternion.identity);
+        damageNumberGameObject.GetComponent<DamageNumber>().PopupDamageNumber(amount);
+        GameObject.Destroy(damageNumberGameObject, 5);
+
+        // Subtract the health.
         CurrentHealth -= amount;
         if(CurrentHealth <= 0)
         {

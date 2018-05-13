@@ -66,6 +66,18 @@ public class TileClickAttackAction : UnitAction
         GameManager.Instance.Map.ClearHighlightedTiles();
 
         // Play any animations or whatever, and then call the callback
+        m_owner.StartCoroutine(WaitForAttackToFinish(callback));
+    }
+
+    /// <summary>
+    /// For now, we need to have some delay time before switching to another state.
+    /// This will be replaced with an actual animation later.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator WaitForAttackToFinish(OnExecuteComplete callback)
+    {
+        yield return new WaitForSeconds(0.1f);
+
         if (callback != null)
         {
             callback();

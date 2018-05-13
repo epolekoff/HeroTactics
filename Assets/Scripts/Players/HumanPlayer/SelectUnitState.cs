@@ -27,7 +27,9 @@ public class SelectUnitState : AbsState
     /// <param name="entity"></param>
     public override void Update(IStateMachineEntity entity)
     {
-        base.Enter(entity);
+        base.Update(entity);
+
+        CheckUserInputForAbilities();
     }
 
     /// <summary>
@@ -74,6 +76,27 @@ public class SelectUnitState : AbsState
         else
         {
             m_player.DeselectUnit();
+        }
+    }
+
+    /// <summary>
+    /// Allow the player to select abilities by pressing the number keys.
+    /// </summary>
+    private void CheckUserInputForAbilities()
+    {
+        if(Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            m_player.SelectAction(0);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            m_player.SelectAction(1);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            m_player.SelectAction(2);
         }
     }
 }
