@@ -68,6 +68,9 @@ public class GameManager : Singleton<GameManager>, IStateMachineEntity
         EnemyPlayer = new EnemyPlayer(m_enemies);
         CurrentPlayer = HumanPlayer;
 
+        // TODO: Only temporary. Show the turn UI popup
+        GameCanvas.TriggerPlayerTurnPopup(CurrentPlayer);
+
         // Set up the state machine
         m_stateMachine = new FiniteStateMachine(new PlayerTurnState(), this);
     }
@@ -96,5 +99,8 @@ public class GameManager : Singleton<GameManager>, IStateMachineEntity
 
         // Tell the new player that it is their turn.
         CurrentPlayer.StartNewTurn();
+
+        // Show the turn UI popup
+        GameCanvas.TriggerPlayerTurnPopup(CurrentPlayer);
     }
 }

@@ -5,6 +5,7 @@ using UnityEngine;
 public class GameCanvas : MonoBehaviour {
 
     public UnitStatsPanel UnitStatsPanel;
+    public PlayerTurnPopup PlayerTurnPopup;
 
     /// <summary>
     /// When starting the game, initialize some of the UI elements as hidden, in case they are left active while developing.
@@ -20,5 +21,13 @@ public class GameCanvas : MonoBehaviour {
     public void ShowUnitStatsPanel(bool show)
     {
         UnitStatsPanel.gameObject.SetActive(show);
+    }
+
+    /// <summary>
+    /// Show the panel.
+    /// </summary>
+    public void TriggerPlayerTurnPopup(Player player)
+    {
+        PlayerTurnPopup.TriggerPopup(player);
     }
 }

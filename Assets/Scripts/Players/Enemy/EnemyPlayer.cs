@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class EnemyPlayer : Player
 {
+    // TODO: For now, keep track of the number of enemies moving to end turn when they all stop.
+    private int m_numEnemiesMoving;
+
     /// <summary>
     /// Constructor
     /// </summary>
@@ -26,9 +29,6 @@ public class EnemyPlayer : Player
     {
         // Just move the enemies up next to the players.
         MoveAllEnemiesNextToRandomHero();
-
-        // Pass the turn back to the player, for now.
-        EndTurn();
     }
 
     /// <summary>
@@ -57,9 +57,22 @@ public class EnemyPlayer : Player
                 if (neighborsOfTargetUnit.Count != 0)
                 {
                     MapTile goal = neighborsOfTargetUnit[0];
-                    MoveUnitToTile(unit, goal.Position);
+                    MoveUnitToTile(unit, goal.Position, OnEnemyFinishedMoving);
+                    m_numEnemiesMoving++;
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// When all enemies stop moving, end my turn.
+    /// </summary>
+    private void OnEnemyFinishedMoving()
+    {
+        m_numEnemiesMoving--;
+        if(m_numEnemiesMoving == 0)
+        {
+            EndTurn();
         }
     }
 }
