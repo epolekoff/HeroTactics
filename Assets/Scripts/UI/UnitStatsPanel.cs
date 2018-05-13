@@ -59,4 +59,12 @@ public class UnitStatsPanel : MonoBehaviour {
         // Get the human player and undo their movement.
         GameManager.Instance.HumanPlayer.UndoMovement();
     }
+
+    /// <summary>
+    /// Select an action for the selected unit.
+    /// </summary>
+    public void OnActionButtonClicked(int index)
+    {
+        GameManager.Instance.HumanPlayer.SelectAction(index);
+    }
 }

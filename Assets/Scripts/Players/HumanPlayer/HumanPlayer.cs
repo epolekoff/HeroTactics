@@ -138,4 +138,27 @@ public class HumanPlayer : Player, IStateMachineEntity
         // Reset the unit so it can move again.
         SelectedUnit.SetCanMoveAndActAgain();
     }
+
+    /// <summary>
+    /// Select the action at the specified index for the selected unit
+    /// </summary>
+    public void SelectAction(int index)
+    {
+        if(SelectedUnit == null)
+        {
+            return;
+        }
+
+        if(index < 0 || index >= SelectedUnit.AvailableActions.Count)
+        {
+            Debug.LogError(string.Format("Attempting to select an action with an out-of-bound index {0} for unit {1}.", index, SelectedUnit.Stats.DisplayName));
+            return;
+        }
+
+        // Select an action.
+        SelectedAction = SelectedUnit.AvailableActions[index];
+
+        // Now that an action is selected, allow the player to aim it.
+        GetStateMachine().ChangeState(new AimActionState());
+    }
 }
