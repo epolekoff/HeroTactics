@@ -4,6 +4,8 @@ using UnityEngine;
 
 public abstract class Player
 {
+    public delegate void MoveUnitToTileCallback(Unit movedUnit);
+
     /// <summary>
     /// Accessor for the units owned by this player.
     /// </summary>
@@ -42,7 +44,7 @@ public abstract class Player
     /// <summary>
     /// A player can move a unit to a tile.
     /// </summary>
-    public void MoveUnitToTile(Unit unit, Vector3 tilePosition, System.Action OnCompleteCallback = null)
+    public void MoveUnitToTile(Unit unit, Vector3 tilePosition, MoveUnitToTileCallback OnCompleteCallback = null)
     {
         GameMap map = GameManager.Instance.Map;
 
@@ -54,7 +56,7 @@ public abstract class Player
             // Call additional callbacks
             if (OnCompleteCallback != null)
             {
-                OnCompleteCallback();
+                OnCompleteCallback(unit);
             }
         });
 

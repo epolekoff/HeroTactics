@@ -70,10 +70,11 @@ public class EnemyPlayer : Player
     /// <summary>
     /// When all enemies stop moving, end my turn.
     /// </summary>
-    private void OnEnemyFinishedMoving()
+    private void OnEnemyFinishedMoving(Unit movedUnit)
     {
         m_numEnemiesMoving--;
         CheckTurnOver();
+        movedUnit.SetCanMoveAndActAgain();
     }
 
     /// <summary>
