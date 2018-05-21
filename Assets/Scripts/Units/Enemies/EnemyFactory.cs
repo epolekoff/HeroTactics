@@ -27,7 +27,7 @@ public static class EnemyFactory
             newEnemies.Add(newEnemy);
 
             // Position the enemies at their starting points.
-            map.MoveObjectToTile(newEnemy, startingPoint.Position, true);
+            map.MoveObjectToTile(newEnemy, startingPoint.Position, forceImmediate: true);
         }
 
         return newEnemies;

@@ -48,23 +48,47 @@ public class EnemyPlayer : Player
             if(enemy.EnemyType == EnemyType.ShortRange)
             {
                 // Generate a path from one of my units to one of my enemy's.
-                GameMap map = GameManager.Instance.Map;
-                int randomTargetIndex = UnityEngine.Random.Range(0, GameManager.Instance.HumanPlayer.Units.Count);
-
-                MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo() { NoStoppingOnEnemies = true, NoStoppingOnAllies = true, Player = this };
-
-                List<MapTile> neighborsOfTargetUnit = map.GetValidNeighbors(GameManager.Instance.HumanPlayer.Units[randomTargetIndex].TilePosition, tileFilterInfo);
-                if (neighborsOfTargetUnit.Count != 0)
+                MapTile goal = SelectGoalTile(enemy);
+                if(goal == null)
                 {
-                    MapTile goal = neighborsOfTargetUnit[0];
-                    MoveUnitToTile(unit, goal.Position, OnEnemyFinishedMoving);
-                    m_numEnemiesMoving++;
+                    continue;
                 }
+                MoveUnitToTile(unit, goal.Position, OnEnemyFinishedMoving);
+                m_numEnemiesMoving++;
             }
         }
 
         // Check in case no enemies are left to move.
         CheckTurnOver();
+    }
+
+    /// <summary>
+    /// Select a tile next to an enemy.
+    /// </summary>
+    /// <returns></returns>
+    private MapTile SelectGoalTile(Enemy enemy)
+    {
+        GameMap map = GameManager.Instance.Map;
+        int randomTargetIndex = UnityEngine.Random.Range(0, GameManager.Instance.HumanPlayer.Units.Count);
+
+        MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo() { NoStoppingOnEnemies = true, NoStoppingOnAllies = true, Player = this };
+
+        List<MapTile> neighborsOfTargetUnit = map.GetValidNeighbors(GameManager.Instance.HumanPlayer.Units[randomTargetIndex].TilePosition, tileFilterInfo);
+        if (neighborsOfTargetUnit.Count != 0)
+        {
+            MapTile goal = neighborsOfTargetUnit[0];
+
+            // Get a path to the goal, but don't let it go longer than the enemy's movement range.
+            var path = Pathfinder.GetPath(map, map.MapTiles[enemy.TilePosition], goal, tileFilterInfo);
+            if(enemy.Stats.MovementRange < path.Count)
+            {
+                path.RemoveRange(enemy.Stats.MovementRange, path.Count - enemy.Stats.MovementRange);
+            }
+
+            return path[path.Count - 1];
+        }
+
+        return null;
     }
 
     /// <summary>

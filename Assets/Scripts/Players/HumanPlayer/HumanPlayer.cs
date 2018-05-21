@@ -67,7 +67,7 @@ public class HumanPlayer : Player, IStateMachineEntity
         SelectedUnit = unit;
 
         // Highlight the movement range, if the unit can move.
-        if(!unit.HasMovedThisTurn)
+        if(unit.CanMove())
         {
             GameManager.Instance.Map.HighlightMovementRange(unit);
         }
@@ -102,7 +102,7 @@ public class HumanPlayer : Player, IStateMachineEntity
         }
 
         // Move the unit back to its original tile.
-        GameManager.Instance.Map.MoveObjectToTile(SelectedUnit, SelectedUnit.PreviousTilePosition, true);
+        GameManager.Instance.Map.MoveObjectToTile(SelectedUnit, SelectedUnit.PreviousTilePosition, forceImmediate: true);
 
         // Reset the unit so it can move again.
         SelectedUnit.SetCanMoveAndActAgain();
@@ -113,7 +113,7 @@ public class HumanPlayer : Player, IStateMachineEntity
     /// </summary>
     public void SelectAction(int index)
     {
-        if(SelectedUnit == null || SelectedUnit.IsEnemyOf(this))
+        if(SelectedUnit == null || SelectedUnit.IsEnemyOf(this) || !SelectedUnit.CanAttack())
         {
             return;
         }

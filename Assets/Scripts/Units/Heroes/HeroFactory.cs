@@ -26,7 +26,7 @@ public static class HeroFactory
             newHeroes.Add(newHero);
 
             // Position the heroes at their starting points.
-            map.MoveObjectToTile(newHero, startingPoint.Position, true);
+            map.MoveObjectToTile(newHero, startingPoint.Position, forceImmediate: true);
         }
 
         return newHeroes;

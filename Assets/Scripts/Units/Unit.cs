@@ -82,6 +82,15 @@ public abstract class Unit : MonoBehaviour
     }
 
     /// <summary>
+    /// Check if this unit can move.
+    /// Units cannot move after they attack (for now).
+    /// </summary>
+    public bool CanMove()
+    {
+        return CanAttack() && !HasMovedThisTurn;
+    }
+
+    /// <summary>
     /// Mark that this unit has moved this turn.
     /// </summary>
     public void SetHasMovedThisTurn()
