@@ -17,7 +17,7 @@ public class MapTile : MonoBehaviour {
     public static float Width = 1f;
 
     // Tiles are scaled slightly smaller height-wise so they look nice.
-    public static float Height = 0.5f;
+    public static float Height = 1f;
 
     /// <summary>
     /// The highlight object.

@@ -14,11 +14,8 @@ public struct MapFileData
     public int Depth;
 }
 
-public static class MapFactory {
-
-    public const float MapTileHeight = 0.5f;
-    public const float MapTileWidth = 1f;
-
+public static class MapFactory
+{
     private const string MapTextAssetPath = "Maps/";
 
     private const string MapTileObjectReference = "Map/MapTile";
@@ -97,9 +94,9 @@ public static class MapFactory {
         List<MapTile> mapTilesOnPoint = new List<MapTile>();
         for (int i = 0; i < height; i++)
         {
-            float x = tile.x * MapTileWidth;
-            float y = i * MapTileHeight;
-            float z = tile.y * MapTileWidth;
+            float x = tile.x * MapTile.Width;
+            float y = i * MapTile.Height;
+            float z = tile.y * MapTile.Width;
             var mapTileObject = GameObject.Instantiate(
                 mapTileResource,
                 new Vector3(x, y, z),
