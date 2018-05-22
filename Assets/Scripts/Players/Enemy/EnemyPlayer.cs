@@ -2,11 +2,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
-public class EnemyPlayer : Player
+public class EnemyPlayer : Player, IStateMachineEntity
 {
     // TODO: For now, keep track of the number of enemies moving to end turn when they all stop.
     private int m_numEnemiesMoving;
+
+    // State machine to watch the units take actions.
+    private FiniteStateMachine m_stateMachine;
+    public FiniteStateMachine GetStateMachine(int number = 0) { return m_stateMachine; }
 
     /// <summary>
     /// Constructor
@@ -15,11 +20,12 @@ public class EnemyPlayer : Player
     public EnemyPlayer(List<Unit> myUnits)
     {
         SetMyUnits(myUnits);
+        m_stateMachine = new FiniteStateMachine(new EnemyPlayerWaitForTurnState(), this);
     }
 
     // Update is called once per frame
     public override void Update () {
-		
+        m_stateMachine.Update();
 	}
 
     /// <summary>
@@ -28,87 +34,20 @@ public class EnemyPlayer : Player
     public override void StartNewTurn()
     {
         // Just move the enemies up next to the players.
-        MoveAllEnemiesNextToRandomHero();
+        m_stateMachine.ChangeState(new EnemyPlayerSelectUnitState());
     }
 
-    /// <summary>
-    /// Test of movement.
-    /// </summary>
-    private void MoveAllEnemiesNextToRandomHero()
+    public override void EndTurn()
     {
-        foreach(Unit unit in Units)
+        base.EndTurn();
+
+        m_stateMachine.ChangeState(new EnemyPlayerWaitForTurnState());
+
+        // Allow all the units to move again
+        foreach(Unit unit in m_myUnits)
         {
-            if(unit == null)
-            {
-                continue;
-            }
-
-            // Only move ShortRange enemies.
-            Enemy enemy = (Enemy)unit;
-            if(enemy.EnemyType == EnemyType.ShortRange)
-            {
-                // Generate a path from one of my units to one of my enemy's.
-                MapTile goal = SelectGoalTile(enemy);
-                if(goal == null)
-                {
-                    continue;
-                }
-                MoveUnitToTile(unit, goal.Position, OnEnemyFinishedMoving);
-                m_numEnemiesMoving++;
-            }
-        }
-
-        // Check in case no enemies are left to move.
-        CheckTurnOver();
-    }
-
-    /// <summary>
-    /// Select a tile next to an enemy.
-    /// </summary>
-    /// <returns></returns>
-    private MapTile SelectGoalTile(Enemy enemy)
-    {
-        GameMap map = GameManager.Instance.Map;
-        int randomTargetIndex = UnityEngine.Random.Range(0, GameManager.Instance.HumanPlayer.Units.Count);
-
-        MapTileFilterInfo tileFilterInfo = new MapTileFilterInfo() { NoStoppingOnEnemies = true, NoStoppingOnAllies = true, Player = this };
-
-        List<MapTile> neighborsOfTargetUnit = map.GetValidNeighbors(GameManager.Instance.HumanPlayer.Units[randomTargetIndex].TilePosition, tileFilterInfo);
-        if (neighborsOfTargetUnit.Count != 0)
-        {
-            MapTile goal = neighborsOfTargetUnit[0];
-
-            // Get a path to the goal, but don't let it go longer than the enemy's movement range.
-            var path = Pathfinder.GetPath(map, map.MapTiles[enemy.TilePosition], goal, tileFilterInfo);
-            if(enemy.Stats.MovementRange < path.Count)
-            {
-                path.RemoveRange(enemy.Stats.MovementRange, path.Count - enemy.Stats.MovementRange);
-            }
-
-            return path[path.Count - 1];
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// When all enemies stop moving, end my turn.
-    /// </summary>
-    private void OnEnemyFinishedMoving(Unit movedUnit)
-    {
-        m_numEnemiesMoving--;
-        CheckTurnOver();
-        movedUnit.SetCanMoveAndActAgain();
-    }
-
-    /// <summary>
-    /// Check if all enemies have finished moving and end the turn.
-    /// </summary>
-    private void CheckTurnOver()
-    {
-        if (m_numEnemiesMoving == 0)
-        {
-            EndTurn();
+            unit.SetCanMoveAndActAgain();
         }
     }
+
 }

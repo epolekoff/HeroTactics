@@ -29,6 +29,16 @@ public class GameCamera : MonoBehaviour
     }
 
     /// <summary>
+    /// Move the camera to look at a specific tile.
+    /// </summary>
+    public void FocusOnTile(MapTile tile, System.Action callback)
+    {
+        m_desiredPosition = tile.Position - transform.forward * 20;
+        m_desiredRotation = transform.rotation;
+        StartCoroutine(LerpCameraToPositionAndRotation(callback));
+    }
+
+    /// <summary>
     /// Take player input and move the camera.
     /// </summary>
     private void HandleInput()
@@ -106,7 +116,7 @@ public class GameCamera : MonoBehaviour
             m_desiredPosition = transform.position;
             transform.rotation = oldRotation;
             transform.position = oldPosition;
-            StartCoroutine(LerpCameraToRotation());
+            StartCoroutine(LerpCameraToPositionAndRotation());
         }
         else
         {
@@ -122,7 +132,7 @@ public class GameCamera : MonoBehaviour
     /// Coroutine to move the camera into place over time.
     /// </summary>
     /// <returns></returns>
-    private IEnumerator LerpCameraToRotation()
+    private IEnumerator LerpCameraToPositionAndRotation(System.Action callback = null)
     {
         m_cameraAnimating = true;
 
@@ -143,6 +153,11 @@ public class GameCamera : MonoBehaviour
         }
 
         m_cameraAnimating = false;
+
+        if(callback != null)
+        {
+            callback();
+        }
     }
 
     /// <summary>
