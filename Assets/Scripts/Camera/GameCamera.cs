@@ -31,7 +31,7 @@ public class GameCamera : MonoBehaviour
     /// <summary>
     /// Move the camera to look at a specific tile.
     /// </summary>
-    public void FocusOnTile(MapTile tile, System.Action callback)
+    public void FocusOnTile(MapTile tile, System.Action callback = null)
     {
         m_desiredPosition = tile.Position - transform.forward * 20;
         m_desiredRotation = transform.rotation;

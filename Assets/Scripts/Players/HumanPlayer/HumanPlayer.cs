@@ -39,7 +39,7 @@ public class HumanPlayer : Player, IStateMachineEntity
     /// </summary>
     public override void StartNewTurn()
     {
-
+        GameManager.Instance.GameCamera.FocusOnTile(GameManager.Instance.Map.MapTiles[m_myUnits[0].TilePosition]);
     }
 
     /// <summary>

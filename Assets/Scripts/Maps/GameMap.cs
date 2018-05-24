@@ -299,8 +299,8 @@ public class GameMap : MonoBehaviour {
     public bool IsTilePositionInBounds(Vector3 tilePosition)
     {
         if (tilePosition.x < 0 || tilePosition.x >= Width ||
-            tilePosition.y < 0 || tilePosition.y >= Depth ||
-            tilePosition.z < 0 || tilePosition.z >= MaxMapHeight)
+            tilePosition.y < 0 || tilePosition.y >= MaxMapHeight ||
+            tilePosition.z < 0 || tilePosition.z >= Depth)
         {
             return false;
         }
@@ -328,11 +328,16 @@ public class GameMap : MonoBehaviour {
         // Check other unit objects on the tile.
         // Sometimes, we want to move through allies or only attack enemies.
         Unit unitOnTile = GetUnitOnTile(tilePosition);
-        if (unitOnTile != null && 
-            ((!unitOnTile.IsEnemyOf(tileFilterInfo.Player) && (tileFilterInfo.AlliesRequired || !tileFilterInfo.EnemiesOk)) ||
-            (unitOnTile.IsEnemyOf(tileFilterInfo.Player) && (tileFilterInfo.EnemiesRequired || !tileFilterInfo.AlliesOk))))
+        if (unitOnTile != null)
         {
-            return false;
+            if (unitOnTile.IsEnemyOf(tileFilterInfo.Player) && (tileFilterInfo.AlliesRequired || !tileFilterInfo.EnemiesOk))
+            {
+                return false;
+            }
+            if(!unitOnTile.IsEnemyOf(tileFilterInfo.Player) && (tileFilterInfo.EnemiesRequired || !tileFilterInfo.AlliesOk))
+            {
+                return false;
+            }
         }
 
         // If a tile is directly above this tile, it cannot be stood on.
@@ -355,10 +360,7 @@ public class GameMap : MonoBehaviour {
         foreach (var potentialTile in allTilesInRange)
         {
             // If the filtering info says we can't stand on the same tile as another unit, then remove those tiles.
-            Unit unitOnTile = GetUnitOnTile(potentialTile.Position);
-            if (unitOnTile != null && 
-                ((tileFilterInfo.NoStoppingOnAllies && !unitOnTile.IsEnemyOf(tileFilterInfo.Player)) || 
-                (tileFilterInfo.NoStoppingOnEnemies && unitOnTile.IsEnemyOf(tileFilterInfo.Player))))
+            if (!CanStopOnThisTile(potentialTile.Position, tileFilterInfo))
             {
                 continue;
             }
@@ -368,6 +370,54 @@ public class GameMap : MonoBehaviour {
         }
         
         return new List<MapTile>(tilesInRangeNoDuplicates);
+    }
+
+    public List<MapTile> GetPath(MapTile start, MapTile goal, MapTileFilterInfo tileFilterInfo, int maxMoveRange = -1)
+    {
+        // Use the pathfinder to get a path.
+        var path = Pathfinder.GetPath(this, start, goal, tileFilterInfo);
+
+        // If the move range is too short, trim the path down.
+        if (maxMoveRange > 0 && maxMoveRange < path.Count)
+        {
+            path.RemoveRange(maxMoveRange, path.Count - maxMoveRange);
+        }
+        if (path.Count == 0)
+        {
+            return path;
+        }
+
+        // Step backwards from the end to remove any invalid landing spaces. This prevents the path from ending on a unit, potentially.
+        bool lastTileInPathIsValid = false;
+        while (!lastTileInPathIsValid && path.Count > 0)
+        {
+            // If the filtering info says we can't stand on the same tile as another unit, then remove those tiles.
+            lastTileInPathIsValid = CanStopOnThisTile(path[path.Count - 1].Position, tileFilterInfo);
+
+            // Remove the last tile since it is invalid.
+            if(!lastTileInPathIsValid)
+            {
+                path.RemoveAt(path.Count - 1);
+            }
+        }
+
+        return path;
+            
+    }
+
+    /// <summary>
+    /// Check if the filter info allows a unit to stop on the specified tile.
+    /// </summary>
+    public bool CanStopOnThisTile(Vector3 tilePosition, MapTileFilterInfo tileFilterInfo)
+    {
+        Unit unitOnTile = GetUnitOnTile(tilePosition);
+        if (unitOnTile != null &&
+            ((tileFilterInfo.NoStoppingOnAllies && !unitOnTile.IsEnemyOf(tileFilterInfo.Player)) ||
+            (tileFilterInfo.NoStoppingOnEnemies && unitOnTile.IsEnemyOf(tileFilterInfo.Player))))
+        {
+            return false;
+        }
+        return true;
     }
 
     /// <summary>

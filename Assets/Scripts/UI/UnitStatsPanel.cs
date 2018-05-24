@@ -67,4 +67,12 @@ public class UnitStatsPanel : MonoBehaviour {
     {
         GameManager.Instance.HumanPlayer.SelectAction(index);
     }
+
+    /// <summary>
+    /// End my turn.
+    /// </summary>
+    public void OnEndTurnButtonPressed()
+    {
+        GameManager.Instance.HumanPlayer.EndTurn();
+    }
 }

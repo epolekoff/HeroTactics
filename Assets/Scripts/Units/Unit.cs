@@ -153,11 +153,7 @@ public abstract class Unit : MonoBehaviour
 
         // Re-lighten the visual.
         Color c = Visual.GetComponent<SpriteRenderer>().color;
-        Visual.GetComponent<SpriteRenderer>().color = new Color(
-            c.r + HasMovedDarkenAmount,
-            c.g + HasMovedDarkenAmount,
-            c.b + HasMovedDarkenAmount,
-            c.a);
+        Visual.GetComponent<SpriteRenderer>().color = Color.white;
     }
 
     /// <summary>
@@ -166,7 +162,7 @@ public abstract class Unit : MonoBehaviour
     /// </summary>
     public bool IsEnemyOf(Player otherPlayer)
     {
-        return Owner != otherPlayer;
+        return Owner.GetType() != otherPlayer.GetType();
     }
 
     /// <summary>

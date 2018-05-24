@@ -6,9 +6,6 @@ using System.Linq;
 
 public class EnemyPlayer : Player, IStateMachineEntity
 {
-    // TODO: For now, keep track of the number of enemies moving to end turn when they all stop.
-    private int m_numEnemiesMoving;
-
     // State machine to watch the units take actions.
     private FiniteStateMachine m_stateMachine;
     public FiniteStateMachine GetStateMachine(int number = 0) { return m_stateMachine; }
