@@ -33,11 +33,13 @@ public abstract class Unit : MonoBehaviour
     /// <summary>
     /// The position of this unit on the map.
     /// </summary>
+    [HideInInspector]
     public Vector3 TilePosition = new Vector3(int.MinValue, int.MinValue, int.MinValue);
 
     /// <summary>
     /// The previous position of this unit, so the player can undo their move.
     /// </summary>
+    [HideInInspector]
     public Vector3 PreviousTilePosition;
 
     public bool IsMoving { get; set; }

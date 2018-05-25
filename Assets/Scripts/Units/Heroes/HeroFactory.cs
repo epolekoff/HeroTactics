@@ -6,7 +6,10 @@ using System.Linq;
 public enum HeroType
 {
     None,
-    Luffy,
+    Attacker,
+    Manipulator,
+    Force,
+    Insight
 }
 
 public static class HeroFactory
