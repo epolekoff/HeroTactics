@@ -16,6 +16,10 @@ public class UnitStatsPanel : MonoBehaviour {
     /// </summary>
     public Button UndoMovementButton;
 
+    /// <summary>
+    /// The action buttons.
+    /// </summary>
+    public List<Button> ActionButtons;
 
 	/// <summary>
     /// Start
@@ -39,6 +43,7 @@ public class UnitStatsPanel : MonoBehaviour {
 
         // Update the health text.
         SetHealthText(selectedUnit.CurrentHealth, selectedUnit.Stats.MaxHealth);
+        SetActionButtonText(selectedUnit.AvailableActions);
 
         // Show or hide the undo movement button depending on whether or not we can undo.
     }
@@ -49,6 +54,23 @@ public class UnitStatsPanel : MonoBehaviour {
     private void SetHealthText(int health, int maxHealth)
     {
         HealthText.text = string.Format("Health: {0}/{1}", health, maxHealth);
+    }
+
+    /// <summary>
+    /// Set the text on each of the buttons to say what move it is.
+    /// </summary>
+    /// <param name="unitActions"></param>
+    private void SetActionButtonText(List<UnitAction> unitActions)
+    {
+        // Iterate all buttons that we have.
+        for(int i = 0; i < ActionButtons.Count; i++)
+        {
+            // Assign the name if the action exists.
+            if(i < unitActions.Count)
+            {
+                ActionButtons[i].GetComponentInChildren<Text>().text = unitActions[i].Name;
+            }
+        }
     }
 
     /// <summary>
