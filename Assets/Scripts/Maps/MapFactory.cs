@@ -83,40 +83,58 @@ public static class MapFactory
     }
 
     /// <summary>
+    /// Create a map tile in the scene.
+    /// </summary>
+    /// <returns></returns>
+    public static MapTile GenerateMapTile(Vector3 position, GameObject mapTileResource = null)
+    {
+        // Load the resource if it was not provided.
+        if (mapTileResource == null)
+        {
+            mapTileResource = Resources.Load(MapTileObjectReference) as GameObject;
+        }
+
+        // Create the object in the scene.
+        float x = position.x * MapTile.Width;
+        float y = position.y * MapTile.Height;
+        float z = position.z * MapTile.Width;
+        var mapTileObject = GameObject.Instantiate(
+            mapTileResource,
+            new Vector3(x, y, z),
+            Quaternion.identity) as GameObject;
+
+        // Initialization
+        MapTile newTile = mapTileObject.GetComponent<MapTile>();
+        newTile.Position = position;
+        mapTileObject.name = string.Format("MapTile({0},{1},{2})", (int)position.x, (int)position.y, (int)position.z);
+
+        return newTile;
+    }
+
+    /// <summary>
     /// Instantiate a map tile at the correct position.
     /// </summary>
     private static List<MapTile> GenerateMapTile(Vector2 tile, int height, GameMap gameMap)
     {
-        var mapTileResource = Resources.Load(MapTileObjectReference);
+        GameObject mapTileResource = Resources.Load(MapTileObjectReference) as GameObject;
         var dirt = Resources.Load(MapTileDirtReference) as Material;
         var grass = Resources.Load(MapTileGrassReference) as Material;
 
         List<MapTile> mapTilesOnPoint = new List<MapTile>();
         for (int i = 0; i < height; i++)
         {
-            float x = tile.x * MapTile.Width;
-            float y = i * MapTile.Height;
-            float z = tile.y * MapTile.Width;
-            var mapTileObject = GameObject.Instantiate(
-                mapTileResource,
-                new Vector3(x, y, z),
-                Quaternion.identity,
-                gameMap.transform) as GameObject;
+            MapTile newTile = GenerateMapTile(new Vector3(tile.x, i, tile.y), mapTileResource);
 
             // Set the tile as dirt or grass.
             if (i == height - 1)
             {
-                mapTileObject.GetComponentInChildren<Renderer>().material = grass;
+                newTile.GetComponentInChildren<Renderer>().material = grass;
             }
             else
             {
-                mapTileObject.GetComponentInChildren<Renderer>().material = dirt;
+                newTile.GetComponentInChildren<Renderer>().material = dirt;
             }
 
-            // Initialization
-            MapTile newTile = mapTileObject.GetComponent<MapTile>();
-            newTile.Position = new Vector3(tile.x, i, tile.y);
-            mapTileObject.name = string.Format("MapTile({0},{1},{2})", (int)tile.x, (int)i, (int)tile.y);
             newTile.RegisterToMap(gameMap);
 
             mapTilesOnPoint.Add(newTile);

@@ -78,6 +78,9 @@ public class MapTile : MonoBehaviour {
             gameMap.MapTiles.Remove(Position);
         }
 
+        // Set the parent
+        transform.SetParent(gameMap.transform);
+
         // Register the new tile.
         gameMap.MapTiles.Add(Position, this);
     }

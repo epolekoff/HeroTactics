@@ -61,6 +61,10 @@ public abstract class Unit : MonoBehaviour
         AvailableActions = new List<UnitAction>();
         foreach(var actionPrefab in Stats.AvailableActions)
         {
+            if(actionPrefab == null)
+            {
+                Debug.LogError(string.Format("Unassigned action on unit {0}.", Stats.DisplayName));
+            }
             GameObject actionObject = Instantiate(actionPrefab.gameObject) as GameObject;
             UnitAction action = actionObject.GetComponent<UnitAction>();
             AvailableActions.Add(action);

@@ -24,6 +24,9 @@ public abstract class UnitAction : MonoBehaviour
     [SerializeField()]
     public UnitActionRange Range;
 
+    [SerializeField()]
+    public int RangeValue;
+
     protected Unit m_owner;
 
     /// <summary>

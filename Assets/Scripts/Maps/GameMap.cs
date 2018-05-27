@@ -8,7 +8,7 @@ using System.Linq;
 /// Determines what tiles should be filtered out of a search.
 /// This allows movement through allies, attacks only on enemies, etc.
 /// </summary>
-public struct MapTileFilterInfo
+public class MapTileFilterInfo
 {
     /// <summary>
     /// Allow tiles with these units to appear in the filter.
@@ -32,14 +32,18 @@ public struct MapTileFilterInfo
     public bool NoStoppingOnEnemies;
 
     /// <summary>
+    /// The height difference allowed when getting neighbors.
+    /// </summary>
+    public int HeightDifferenceAllowed = 1;
+
+    /// <summary>
     /// The player doing the filtering. This allows the algorithm to know who is an Ally or an Enemy.
     /// </summary>
     public Player Player;
 }
 
-public class GameMap : MonoBehaviour {
-
-    private const float ValidNeighborHeightDifference = 1;
+public class GameMap : MonoBehaviour
+{
     private const int MaxMapHeight = 10;
 
     public int Width;
@@ -174,9 +178,9 @@ public class GameMap : MonoBehaviour {
     /// <summary>
     /// Get all tiles in range of a tile and highlight them as actionable.
     /// </summary>
-    public void HighlightActionRange(Vector3 startTile, UnitActionRange range, MapTileFilterInfo tileFilterInfo)
+    public void HighlightActionRange(Vector3 startTile, UnitActionRange range, int rangeValue, MapTileFilterInfo tileFilterInfo)
     {
-        List<MapTile> mapTilesInRange = GetAllMapTilesInActionRange(startTile, range, tileFilterInfo);
+        List<MapTile> mapTilesInRange = GetAllMapTilesInActionRange(startTile, range, rangeValue, tileFilterInfo);
         foreach(var mapTile in mapTilesInRange)
         {
             m_highlightedTiles.Add(mapTile);
@@ -188,21 +192,21 @@ public class GameMap : MonoBehaviour {
     /// Given an action range, return a list of tiles that fall in that range of the original tile.
     /// </summary>
     /// <returns></returns>
-    public List<MapTile> GetAllMapTilesInActionRange(Vector3 startTile, UnitActionRange range, MapTileFilterInfo tileFilterInfo)
+    public List<MapTile> GetAllMapTilesInActionRange(Vector3 startTile, UnitActionRange range, int rangeValue, MapTileFilterInfo tileFilterInfo)
     {
         List<MapTile> mapTilesInActionRange = new List<MapTile>();
 
         switch(range)
         {
             case UnitActionRange.Adjacent:
-                mapTilesInActionRange = GetAllTilesInRange(startTile, 1, tileFilterInfo);
+                mapTilesInActionRange = GetAllTilesInRange(startTile, rangeValue, tileFilterInfo);
                 break;
             case UnitActionRange.Self:
                 mapTilesInActionRange.Add(MapTiles[startTile]);
                 break;
             case UnitActionRange.SkipOneTile:
                 List<MapTile> adjacentMapTiles = GetAllTilesInRange(startTile, 1, tileFilterInfo);
-                List<MapTile> rangeOfTwo = GetAllTilesInRange(startTile, 2, tileFilterInfo);
+                List<MapTile> rangeOfTwo = GetAllTilesInRange(startTile, rangeValue, tileFilterInfo);
                 mapTilesInActionRange = rangeOfTwo.Except(adjacentMapTiles).ToList();
                 break;
         }
@@ -242,53 +246,79 @@ public class GameMap : MonoBehaviour {
 
         List<MapTile> neighbors = new List<MapTile>();
 
-        // Same elevation
-        Vector3 left = new Vector3(x - 1, y, z);
-        Vector3 right = new Vector3(x + 1, y, z);
-        Vector3 front = new Vector3(x, y, z + 1);
-        Vector3 back = new Vector3(x, y, z - 1);
+        //// Same elevation
+        //Vector3 left = new Vector3(x - 1, y, z);
+        //Vector3 right = new Vector3(x + 1, y, z);
+        //Vector3 front = new Vector3(x, y, z + 1);
+        //Vector3 back = new Vector3(x, y, z - 1);
+        //
+        //// Up in elevation
+        ////Vector3 up = tilePosition + new Vector3(0, 1, 0);
+        //Vector3 up_left = left + new Vector3(0, 1, 0);
+        //Vector3 up_right = right + new Vector3(0, 1, 0);
+        //Vector3 up_front = front + new Vector3(0, 1, 0);
+        //Vector3 up_back = back + new Vector3(0, 1, 0);
+        //
+        //// Down in elevation
+        ////Vector3 down = tilePosition - new Vector3(0, 1, 0);
+        //Vector3 down_left = left - new Vector3(0, 1, 0);
+        //Vector3 down_right = right - new Vector3(0, 1, 0);
+        //Vector3 down_front = front - new Vector3(0, 1, 0);
+        //Vector3 down_back = back - new Vector3(0, 1, 0);
 
-        // Up in elevation
-        //Vector3 up = tilePosition + new Vector3(0, 1, 0);
-        Vector3 up_left = left + new Vector3(0, 1, 0);
-        Vector3 up_right = right + new Vector3(0, 1, 0);
-        Vector3 up_front = front + new Vector3(0, 1, 0);
-        Vector3 up_back = back + new Vector3(0, 1, 0);
+        // Iterate all neighbor tiles, and a number of tiles above in case height is irrelevant.
+        //for(int neighborX = x - 1; neighborX <= x + 1; neighborX++)
+        {
+            for (int neighborY = y - tileFilterInfo.HeightDifferenceAllowed; neighborY <= y + tileFilterInfo.HeightDifferenceAllowed; neighborY++)
+            {
+                //for (int neighborZ = z - 1; neighborZ <= z + 1; neighborZ++)
+                {
+                    Vector3 left = new Vector3(x - 1, neighborY, z);
+                    Vector3 right = new Vector3(x + 1, neighborY, z);
+                    Vector3 front = new Vector3(x, neighborY, z + 1);
+                    Vector3 back = new Vector3(x, neighborY, z - 1);
 
-        // Down in elevation
-        //Vector3 down = tilePosition - new Vector3(0, 1, 0);
-        Vector3 down_left = left - new Vector3(0, 1, 0);
-        Vector3 down_right = right - new Vector3(0, 1, 0);
-        Vector3 down_front = front - new Vector3(0, 1, 0);
-        Vector3 down_back = back - new Vector3(0, 1, 0);
+                    if (IsValidTilePosition(left, tileFilterInfo) && Mathf.Abs(left.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+                        neighbors.Add(MapTiles[left]);
+                    if (IsValidTilePosition(right, tileFilterInfo) && Mathf.Abs(right.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+                        neighbors.Add(MapTiles[right]);
+                    if (IsValidTilePosition(front, tileFilterInfo) && Mathf.Abs(front.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+                        neighbors.Add(MapTiles[front]);
+                    if (IsValidTilePosition(back, tileFilterInfo) && Mathf.Abs(back.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+                        neighbors.Add(MapTiles[back]);
+                }
+            }
+        }
 
+        // Remove myself from my neighbors list.
+        neighbors.Remove(MapTiles[tilePosition]);
 
-        if (IsValidTilePosition(left, tileFilterInfo) && Mathf.Abs(left.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(MapTiles[left]);
-        if (IsValidTilePosition(right, tileFilterInfo) && Mathf.Abs(right.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(MapTiles[right]);
-        if (IsValidTilePosition(front, tileFilterInfo) && Mathf.Abs(front.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(MapTiles[front]);
-        if (IsValidTilePosition(back, tileFilterInfo) && Mathf.Abs(back.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(MapTiles[back]);
-
-        if (IsValidTilePosition(up_left, tileFilterInfo) && Mathf.Abs(up_left.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(MapTiles[up_left]);
-        if (IsValidTilePosition(up_right, tileFilterInfo) && Mathf.Abs(up_right.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(MapTiles[up_right]);
-        if (IsValidTilePosition(up_front, tileFilterInfo) && Mathf.Abs(up_front.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(MapTiles[up_front]);
-        if (IsValidTilePosition(up_back, tileFilterInfo) && Mathf.Abs(up_back.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(MapTiles[up_back]);
-
-        if (IsValidTilePosition(down_left, tileFilterInfo) && Mathf.Abs(down_left.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(MapTiles[down_left]);
-        if (IsValidTilePosition(down_right, tileFilterInfo) && Mathf.Abs(down_right.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(MapTiles[down_right]);
-        if (IsValidTilePosition(down_front, tileFilterInfo) && Mathf.Abs(down_front.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(MapTiles[down_front]);
-        if (IsValidTilePosition(down_back, tileFilterInfo) && Mathf.Abs(down_back.z - tilePosition.z) <= ValidNeighborHeightDifference)
-            neighbors.Add(MapTiles[down_back]);
+        //if (IsValidTilePosition(left, tileFilterInfo) && Mathf.Abs(left.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+        //    neighbors.Add(MapTiles[left]);
+        //if (IsValidTilePosition(right, tileFilterInfo) && Mathf.Abs(right.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+        //    neighbors.Add(MapTiles[right]);
+        //if (IsValidTilePosition(front, tileFilterInfo) && Mathf.Abs(front.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+        //    neighbors.Add(MapTiles[front]);
+        //if (IsValidTilePosition(back, tileFilterInfo) && Mathf.Abs(back.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+        //    neighbors.Add(MapTiles[back]);
+        //
+        //if (IsValidTilePosition(up_left, tileFilterInfo) && Mathf.Abs(up_left.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+        //    neighbors.Add(MapTiles[up_left]);
+        //if (IsValidTilePosition(up_right, tileFilterInfo) && Mathf.Abs(up_right.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+        //    neighbors.Add(MapTiles[up_right]);
+        //if (IsValidTilePosition(up_front, tileFilterInfo) && Mathf.Abs(up_front.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+        //    neighbors.Add(MapTiles[up_front]);
+        //if (IsValidTilePosition(up_back, tileFilterInfo) && Mathf.Abs(up_back.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+        //    neighbors.Add(MapTiles[up_back]);
+        //
+        //if (IsValidTilePosition(down_left, tileFilterInfo) && Mathf.Abs(down_left.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+        //    neighbors.Add(MapTiles[down_left]);
+        //if (IsValidTilePosition(down_right, tileFilterInfo) && Mathf.Abs(down_right.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+        //    neighbors.Add(MapTiles[down_right]);
+        //if (IsValidTilePosition(down_front, tileFilterInfo) && Mathf.Abs(down_front.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+        //    neighbors.Add(MapTiles[down_front]);
+        //if (IsValidTilePosition(down_back, tileFilterInfo) && Mathf.Abs(down_back.y - tilePosition.y) <= tileFilterInfo.HeightDifferenceAllowed)
+        //    neighbors.Add(MapTiles[down_back]);
 
         return neighbors;
     }
@@ -339,11 +369,13 @@ public class GameMap : MonoBehaviour {
                 return false;
             }
         }
-
-        // If a tile is directly above this tile, it cannot be stood on.
-        if(MapTiles.ContainsKey(tilePosition + Vector3.up))
+        else
         {
-            return false;
+            // If a tile is directly above this tile, it cannot be stood on.
+            if (MapTiles.ContainsKey(tilePosition + Vector3.up))
+            {
+                return false;
+            }
         }
 
         return true;
@@ -418,6 +450,22 @@ public class GameMap : MonoBehaviour {
             return false;
         }
         return true;
+    }
+
+    /// <summary>
+    /// Given a tile, create a new tile on top of it.
+    /// </summary>
+    public void CreateMapTileOnTopOfTile(MapTile existingTile)
+    {
+        if(GetUnitOnTile(existingTile.Position) != null)
+        {
+            Debug.LogError(string.Format("Attempting to create tile on top of existing tile that has a unit on it. Position {0}", existingTile.Position));
+            return;
+        }
+
+        Vector3 newTilePosition = new Vector3(existingTile.Position.x, existingTile.Position.y + 1, existingTile.Position.z);
+        MapTile newTile = MapFactory.GenerateMapTile(newTilePosition);
+        newTile.RegisterToMap(this);
     }
 
     /// <summary>

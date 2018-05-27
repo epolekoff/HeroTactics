@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TileClickAttackAction : UnitAction
+public class CreateTerrainAction : UnitAction
 {
     // Members
     protected MapTile m_targetTile;
@@ -18,6 +18,8 @@ public class TileClickAttackAction : UnitAction
             EnemiesOk = true,
             AlliesOk = true,
             NoStoppingOnAllies = true,
+            NoStoppingOnEnemies= true,
+            HeightDifferenceAllowed = 8, // An arbitrary value, but prevents infinite towers.
             Player = selectedUnit.Owner
         };
         GameManager.Instance.Map.HighlightActionRange(selectedUnit.TilePosition, Range, RangeValue, tileFilterInfo);
@@ -57,17 +59,13 @@ public class TileClickAttackAction : UnitAction
     /// </summary>
     public override void Execute(OnExecuteComplete callback)
     {
-        Unit attackedUnit = GameManager.Instance.Map.GetUnitOnTile(m_targetTile.Position);
-        if(attackedUnit != null)
-        {
-            attackedUnit.TakeDamage(Damage);
-        }
+        GameManager.Instance.Map.CreateMapTileOnTopOfTile(m_targetTile);
 
         // Clean up the highlights.
         GameManager.Instance.Map.ClearHighlightedTiles();
 
         // Play any animations or whatever, and then call the callback
-        m_owner.StartCoroutine(WaitForAttackToFinish(callback));
+        m_owner.StartCoroutine(WaitForActionToFinish(callback));
     }
 
     /// <summary>
@@ -75,7 +73,7 @@ public class TileClickAttackAction : UnitAction
     /// This will be replaced with an actual animation later.
     /// </summary>
     /// <returns></returns>
-    private IEnumerator WaitForAttackToFinish(OnExecuteComplete callback)
+    private IEnumerator WaitForActionToFinish(OnExecuteComplete callback)
     {
         yield return new WaitForSeconds(0.1f);
 
