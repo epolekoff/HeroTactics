@@ -7,7 +7,8 @@ public enum HighlightState
     None,
     Friendly,
     Enemy,
-    Attack
+    Attack,
+    TargetEnemy
 }
 
 public class MapTile : MonoBehaviour {
@@ -112,6 +113,11 @@ public class MapTile : MonoBehaviour {
                 HighlightFriendly.SetActive(false);
                 HighlightEnemy.SetActive(false);
                 HighlightAttack.SetActive(true);
+                break;
+            case HighlightState.TargetEnemy:
+                HighlightFriendly.SetActive(false);
+                HighlightEnemy.SetActive(true);
+                HighlightAttack.SetActive(false);
                 break;
         }
     }

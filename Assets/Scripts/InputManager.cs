@@ -62,7 +62,7 @@ public class InputManager : Singleton<InputManager>
             LayerMask.GetMask("MapTile")))
         {
             // Get the hit tile.
-            var mapTile = hit.transform.parent.GetComponent<MapTile>();
+            var mapTile = hit.transform.GetComponent<MapTile>();
             if (mapTile != null)
             {
                 m_mousedOverTile = mapTile;

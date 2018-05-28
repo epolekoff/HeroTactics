@@ -2,13 +2,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 [RequireComponent(typeof(LineRenderer))]
 public class ShootLaserAction : UnitAction
 {
+    private List<Unit> m_hitUnits;
 
     public override bool Aim()
     {
+        // Clear the list of hit units.
+        ClearHitUnitTileHighlights();
+        m_hitUnits = new List<Unit>();
+
         // Get the unit position
         Vector3 unitPosition = m_owner.transform.position + Vector3.up * 0.1f;
 
@@ -36,23 +42,57 @@ public class ShootLaserAction : UnitAction
             float rangeRemaining = RangeValue;
             while(!doneBouncing)
             {
-                RaycastHit hit;
-                if (Physics.Raycast(
+                // Cast a ray, get all of the units and walls hit.
+                RaycastHit[] hits = Physics.RaycastAll(
                     new Ray(lastHitPoint, aimVector),
-                    out hit,
                     rangeRemaining,
-                    LayerMask.GetMask("MapTile")))
+                    LayerMask.GetMask("MapTile", "Unit")).OrderBy(h => h.distance).ToArray(); ;
+
+                // If we hit something, reflect off of the first wall and record all enemies hit.
+                if(hits.Length > 0)
                 {
-                    // Keep track of the distance to this point and subtract it from the range.
-                    float distanceToHit = Vector3.Distance(unitPosition, hit.point);
-                    rangeRemaining -= distanceToHit;
+                    bool mapTileWasHitThisRaycast = false;
+                    for(int i = 0; i < hits.Length; i++)
+                    {
+                        Unit hitUnit = hits[i].transform.GetComponent<Unit>();
+                        MapTile hitTile = hits[i].transform.GetComponent<MapTile>();
 
-                    aimVector = Vector3.Reflect(aimVector, hit.normal);
-                    lastHitPoint = hit.point;
+                        // If hitting a unit, add it to a list to deal damage.
+                        if (hitUnit && !m_hitUnits.Contains(hitUnit))
+                        {
+                            m_hitUnits.Add(hits[i].transform.GetComponent<Unit>());
+                            continue;
+                        }
 
-                    // Add the hit point.
-                    aimLinePoints.Add(hit.point);
+                        // If hitting a tile, reflect the laser and break. Don't pierce walls.
+                        if(hitTile)
+                        {
+                            mapTileWasHitThisRaycast = true;
 
+                            // Keep track of the distance to this point and subtract it from the range.
+                            float distanceToHit = Vector3.Distance(unitPosition, hits[i].point);
+                            rangeRemaining -= distanceToHit;
+
+                            // Keep track of the last hit point.
+                            lastHitPoint = hits[i].point;
+
+                            // Add the hit point.
+                            aimLinePoints.Add(hits[i].point);
+
+                            // Update the aim vector.
+                            aimVector = Vector3.Reflect(aimVector, hits[i].normal);
+                            break;
+                        }
+                    }
+
+                    // If we cast through a bunch of objects and no wall was hit, then we don't need to bounce off of anything.
+                    if(!mapTileWasHitThisRaycast)
+                    {
+                        // Add the last point to the list
+                        aimLinePoints.Add(lastHitPoint + aimVector * rangeRemaining);
+
+                        doneBouncing = true;
+                    }
                 }
                 else
                 {
@@ -61,6 +101,12 @@ public class ShootLaserAction : UnitAction
 
                     doneBouncing = true;
                 }
+            }
+
+            // For each unit hit, highlight their tile tile.
+            foreach (Unit hitUnit in m_hitUnits)
+            {
+                GameManager.Instance.Map.MapTiles[hitUnit.TilePosition].ShowHighlight(HighlightState.TargetEnemy);
             }
         }
 
@@ -78,6 +124,15 @@ public class ShootLaserAction : UnitAction
         // Hide the aiming line.
         GetComponent<LineRenderer>().enabled = false;
 
+        // Hit all of the enemies.
+        foreach (Unit hitUnit in m_hitUnits)
+        {
+            hitUnit.TakeDamage(Damage);
+        }
+
+        // Clear the Hit Unit tile highlights.
+        ClearHitUnitTileHighlights();
+
         // Change states.
         if (callback != null)
         {
@@ -92,6 +147,9 @@ public class ShootLaserAction : UnitAction
     {
         // Hide the aiming line.
         GetComponent<LineRenderer>().enabled = false;
+
+        // Clear the Hit Unit tile highlights.
+        ClearHitUnitTileHighlights();
 
         // Change states.
         if (callback != null)
@@ -108,5 +166,21 @@ public class ShootLaserAction : UnitAction
     public override void OnActionDeselected(Unit selectedUnit)
     {
         
+    }
+
+    /// <summary>
+    /// Clear the tiles of the highlighted units.
+    /// </summary>
+    private void ClearHitUnitTileHighlights()
+    {
+        if(m_hitUnits == null)
+        {
+            return;
+        }
+
+        foreach (Unit hitUnit in m_hitUnits)
+        {
+            GameManager.Instance.Map.MapTiles[hitUnit.TilePosition].ShowHighlight(HighlightState.None);
+        }
     }
 }
