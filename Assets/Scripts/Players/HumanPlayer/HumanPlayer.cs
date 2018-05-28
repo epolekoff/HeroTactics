@@ -66,8 +66,11 @@ public class HumanPlayer : Player, IStateMachineEntity
     {
         SelectedUnit = unit;
 
+        // When selecting a unit, clear the highlighted tiles.
+        GameManager.Instance.Map.ClearHighlightedTiles();
+
         // Highlight the movement range, if the unit can move.
-        if(unit.CanMove())
+        if (unit.CanMove())
         {
             GameManager.Instance.Map.HighlightMovementRange(unit);
         }
@@ -124,8 +127,11 @@ public class HumanPlayer : Player, IStateMachineEntity
             return;
         }
 
+        // Hide existing highlights before creating new ones for the aiming.
+        GameManager.Instance.Map.ClearHighlightedTiles();
+
         // Select an action, and deselect the old action.
-        if(SelectedAction != null) { SelectedAction.OnActionDeselected(SelectedUnit); }
+        if (SelectedAction != null) { SelectedAction.OnActionDeselected(SelectedUnit); }
         SelectedAction = SelectedUnit.AvailableActions[index];
         SelectedAction.OnActionSelected(SelectedUnit);
 

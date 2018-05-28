@@ -40,8 +40,14 @@ public class AimActionState : AbsState {
             else
             {
                 // Clicking on an invalid tile cancels the attack.
-                entity.GetStateMachine().ChangeState(new SelectUnitState());
+                player.SelectedAction.Cancel(() => OnActionCancelled(entity));
             }
+        }
+
+        // Right click to cancel.
+        if (Input.GetMouseButtonDown(1))
+        {
+            player.SelectedAction.Cancel(() => OnActionCancelled(entity));
         }
     }
 
@@ -62,6 +68,15 @@ public class AimActionState : AbsState {
         // Set that this unit has attacked
         ((HumanPlayer)entity).SelectedUnit.SetHasAttackedThisTurn();
 
+        // Allow the player to select the next unit.
+        entity.GetStateMachine().ChangeState(new SelectUnitState());
+    }
+
+    /// <summary>
+    /// Called when the action has finished executing.
+    /// </summary>
+    private void OnActionCancelled(IStateMachineEntity entity)
+    {
         // Allow the player to select the next unit.
         entity.GetStateMachine().ChangeState(new SelectUnitState());
     }

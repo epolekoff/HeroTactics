@@ -52,7 +52,7 @@ public class InputManager : Singleton<InputManager>
     /// </summary>
     private void CheckMouseOverTile()
     {
-        // Click on a tile.
+        // Raycast to a tile.
         RaycastHit hit;
         Ray ray = GameManager.Instance.GameCamera.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(
@@ -61,7 +61,7 @@ public class InputManager : Singleton<InputManager>
             10000f,
             LayerMask.GetMask("MapTile")))
         {
-            // Handle clicking on the tile.
+            // Get the hit tile.
             var mapTile = hit.transform.parent.GetComponent<MapTile>();
             if (mapTile != null)
             {

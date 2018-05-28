@@ -58,4 +58,9 @@ public abstract class UnitAction : MonoBehaviour
     /// Execute this action, using the values gathered while aiming.
     /// </summary>
     public abstract void Execute(OnExecuteComplete callback);
+
+    /// <summary>
+    /// Cancel the action while in the aiming phase.
+    /// </summary>
+    public abstract void Cancel(System.Action callback);
 }

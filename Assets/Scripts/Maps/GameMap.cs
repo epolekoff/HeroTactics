@@ -180,6 +180,8 @@ public class GameMap : MonoBehaviour
     /// </summary>
     public void HighlightActionRange(Vector3 startTile, UnitActionRange range, int rangeValue, MapTileFilterInfo tileFilterInfo)
     {
+        ClearHighlightedTiles();
+
         List<MapTile> mapTilesInRange = GetAllMapTilesInActionRange(startTile, range, rangeValue, tileFilterInfo);
         foreach(var mapTile in mapTilesInRange)
         {

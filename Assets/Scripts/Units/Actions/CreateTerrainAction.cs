@@ -69,6 +69,17 @@ public class CreateTerrainAction : UnitAction
     }
 
     /// <summary>
+    /// Cancel the aiming.
+    /// </summary>
+    public override void Cancel(System.Action callback)
+    {
+        if(callback != null)
+        {
+            callback();
+        }
+    }
+
+    /// <summary>
     /// For now, we need to have some delay time before switching to another state.
     /// This will be replaced with an actual animation later.
     /// </summary>
